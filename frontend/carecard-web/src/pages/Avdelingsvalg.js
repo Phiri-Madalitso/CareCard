@@ -29,6 +29,11 @@ function formatDate() {
 function Avdelingsvalg() {
   const navigate = useNavigate();
 
+  const handleLoggUt = () => {
+    localStorage.removeItem('innlogget');
+    navigate('/');
+  };
+
   return (
     <div style={styles.page}>
       <link
@@ -38,11 +43,16 @@ function Avdelingsvalg() {
 
       <header style={styles.header}>
         <div>
-          <p style={styles.greeting}>{getGreeting()}</p>
-          <h1 style={styles.name}>Kemilly 👋</h1>
+          <p style={styles.greeting}>{getGreeting()},</p>
+          <h1 style={styles.name}>Madalitso 👋</h1>
           <p style={styles.date}>{formatDate()}</p>
         </div>
-        <div style={styles.avatar}>MS</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button onClick={handleLoggUt} style={styles.loggUtKnapp}>
+            Logg ut
+          </button>
+          <div style={styles.avatar}>MS</div>
+        </div>
       </header>
 
       <h2 style={styles.question}>Hvilken avdeling jobber du på i dag?</h2>
@@ -148,6 +158,14 @@ const styles = {
   cardSubtitle: {
     fontSize: 13,
     color: '#6B7280',
+  },
+  loggUtKnapp: {
+    fontSize: '13px',
+    fontWeight: '600',
+    color: '#A32D2D',
+    background: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
   },
 };
 

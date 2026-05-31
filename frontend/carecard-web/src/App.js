@@ -4,15 +4,22 @@ import Login from './pages/Login';
 import Avdelingsvalg from './pages/Avdelingsvalg';
 import Pasientliste from './pages/Pasientliste';
 import Pasientkort from './pages/Pasientkort';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/avdelingsvalg" element={<Avdelingsvalg />} />
-        <Route path="/pasienter" element={<Pasientliste />} />
-        <Route path="/pasient/:id" element={<Pasientkort />} />
+        <Route path="/avdelingsvalg" element={
+          <ProtectedRoute><Avdelingsvalg /></ProtectedRoute>
+        } />
+        <Route path="/pasienter" element={
+          <ProtectedRoute><Pasientliste /></ProtectedRoute>
+        } />
+        <Route path="/pasient/:id" element={
+          <ProtectedRoute><Pasientkort /></ProtectedRoute>
+        } />
       </Routes>
     </BrowserRouter>
   );

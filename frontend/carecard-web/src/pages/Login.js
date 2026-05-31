@@ -45,6 +45,7 @@ function Login() {
     if (email === VALID_EMAIL && password === VALID_PASSWORD) {
       setAttempts(0);
       setError('');
+      localStorage.setItem('innlogget', 'true');
       navigate('/avdelingsvalg');
       return;
     }
