@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { IconChevronLeft, IconSearch } from '@tabler/icons-react';
+import Navbar from '../components/Navbar';
 
 const PASIENTER = [
   { id: 1, fornavn: 'Astrid', etternavn: 'Henriksen', rom: '312', allergi: true, dia: false, fortykning: true },
@@ -60,13 +61,15 @@ function Pasientliste() {
   }, [search, activeFilter]);
 
   return (
-    <div style={styles.page}>
-      <link
-        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap"
-        rel="stylesheet"
-      />
+    <>
+      <Navbar antallVentende={2} />
+      <div style={styles.page}>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap"
+          rel="stylesheet"
+        />
 
-      <div style={styles.topbar}>
+        <div style={styles.topbar}>
         <button style={styles.backButton} onClick={() => navigate(-1)}>
           <IconChevronLeft size={22} color="#13171F" />
         </button>
@@ -150,10 +153,11 @@ function Pasientliste() {
         ))}
       </div>
 
-      <p style={styles.countText}>
-        {filtered.length} aktive pasient{filtered.length !== 1 ? 'er' : ''}
-      </p>
-    </div>
+        <p style={styles.countText}>
+          {filtered.length} aktive pasient{filtered.length !== 1 ? 'er' : ''}
+        </p>
+      </div>
+    </>
   );
 }
 
@@ -162,7 +166,7 @@ const styles = {
     fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
     maxWidth: 480,
     margin: '0 auto',
-    padding: '48px 24px 24px',
+    padding: '24px 24px 24px',
     minHeight: '100vh',
     boxSizing: 'border-box',
     backgroundColor: '#fff',

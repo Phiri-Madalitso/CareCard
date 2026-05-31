@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Avdelingsvalg from './pages/Avdelingsvalg';
 import Pasientliste from './pages/Pasientliste';
 import Pasientkort from './pages/Pasientkort';
+import Godkjenning from './pages/Godkjenning';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -19,6 +20,9 @@ function App() {
         } />
         <Route path="/pasient/:id" element={
           <ProtectedRoute><Pasientkort /></ProtectedRoute>
+        } />
+        <Route path="/godkjenning" element={
+          <ProtectedRoute><Godkjenning /></ProtectedRoute>
         } />
       </Routes>
     </BrowserRouter>

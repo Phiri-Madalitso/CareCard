@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IconChevronRight } from '@tabler/icons-react';
+import { IconChevronRight, IconLogout } from '@tabler/icons-react';
+import Navbar from '../components/Navbar';
 
 const AVDELINGER = [
   { id: 1, navn: 'Langtidsavdeling', enhetsnummer: 'Avdeling 1' },
@@ -31,48 +32,54 @@ function Avdelingsvalg() {
 
   const handleLoggUt = () => {
     localStorage.removeItem('innlogget');
+    localStorage.removeItem('rolle');
+    localStorage.removeItem('navn');
     navigate('/');
   };
 
   return (
-    <div style={styles.page}>
-      <link
-        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap"
-        rel="stylesheet"
-      />
+    <>
+      <Navbar antallVentende={2} />
+      <div style={styles.page}>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap"
+          rel="stylesheet"
+        />
 
-      <header style={styles.header}>
-        <div>
-          <p style={styles.greeting}>{getGreeting()},</p>
-          <h1 style={styles.name}>Madalitso 👋</h1>
-          <p style={styles.date}>{formatDate()}</p>
+        <header style={styles.header}>
+          <div>
+            <p style={styles.greeting}>{getGreeting()},</p>
+            <h1 style={styles.name}>Madalitso 👋</h1>
+            <p style={styles.date}>{formatDate()}</p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button type="button" onClick={handleLoggUt} style={styles.loggUtKnapp}>
+              <IconLogout size={22} stroke={1.75} color="#13171F" />
+              <span>Logg ut</span>
+            </button>
+            <div style={styles.avatar}>MS</div>
+          </div>
+        </header>
+
+        <h2 style={styles.question}>Hvilken avdeling jobber du på i dag?</h2>
+
+        <div style={styles.cardList}>
+          {AVDELINGER.map((avdeling) => (
+            <button
+              key={avdeling.id}
+              style={styles.card}
+              onClick={() => navigate('/pasienter', { state: { avdeling } })}
+            >
+              <div style={styles.cardContent}>
+                <span style={styles.cardTitle}>{avdeling.navn}</span>
+                <span style={styles.cardSubtitle}>{avdeling.enhetsnummer}</span>
+              </div>
+              <IconChevronRight size={20} color="#6B7280" />
+            </button>
+          ))}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button onClick={handleLoggUt} style={styles.loggUtKnapp}>
-            Logg ut
-          </button>
-          <div style={styles.avatar}>MS</div>
-        </div>
-      </header>
-
-      <h2 style={styles.question}>Hvilken avdeling jobber du på i dag?</h2>
-
-      <div style={styles.cardList}>
-        {AVDELINGER.map((avdeling) => (
-          <button
-            key={avdeling.id}
-            style={styles.card}
-            onClick={() => navigate('/pasienter', { state: { avdeling } })}
-          >
-            <div style={styles.cardContent}>
-              <span style={styles.cardTitle}>{avdeling.navn}</span>
-              <span style={styles.cardSubtitle}>{avdeling.enhetsnummer}</span>
-            </div>
-            <IconChevronRight size={20} color="#6B7280" />
-          </button>
-        ))}
       </div>
-    </div>
+    </>
   );
 }
 
@@ -81,7 +88,7 @@ const styles = {
     fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
     maxWidth: 480,
     margin: '0 auto',
-    padding: '48px 24px 24px',
+    padding: '24px 24px 24px',
     minHeight: '100vh',
     boxSizing: 'border-box',
     backgroundColor: '#fff',
@@ -160,12 +167,18 @@ const styles = {
     color: '#6B7280',
   },
   loggUtKnapp: {
-    fontSize: '13px',
-    fontWeight: '600',
-    color: '#A32D2D',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '4px',
+    fontSize: '12px',
+    fontWeight: '700',
+    color: '#13171F',
     background: 'transparent',
     border: 'none',
     cursor: 'pointer',
+    padding: '4px 6px',
+    fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
   },
 };
 

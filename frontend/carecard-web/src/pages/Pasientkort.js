@@ -10,6 +10,7 @@ import {
   IconX,
   IconClock,
 } from '@tabler/icons-react';
+import Navbar from '../components/Navbar';
 
 const ASTRID_DATA = {
   allergier: ['Nøtter (alle typer)', 'Skalldyr'],
@@ -132,13 +133,15 @@ function Pasientkort() {
   };
 
   return (
-    <div style={styles.page}>
-      <link
-        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap"
-        rel="stylesheet"
-      />
+    <>
+      <Navbar antallVentende={2} />
+      <div style={styles.page}>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap"
+          rel="stylesheet"
+        />
 
-      <div style={styles.topbar}>
+        <div style={styles.topbar}>
         <button style={styles.iconButton} onClick={() => navigate(-1)}>
           <IconChevronLeft size={22} color="#13171F" />
         </button>
@@ -325,12 +328,13 @@ function Pasientkort() {
         </div>
       )}
 
-      {visToast && (
-        <div style={styles.toast}>
-          ✓ Forslag sendt til godkjenning
-        </div>
-      )}
-    </div>
+        {visToast && (
+          <div style={styles.toast}>
+            ✓ Forslag sendt til godkjenning
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -339,7 +343,7 @@ const styles = {
     fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
     maxWidth: 480,
     margin: '0 auto',
-    padding: '48px 24px 24px',
+    padding: '24px 24px 24px',
     minHeight: '100vh',
     boxSizing: 'border-box',
     backgroundColor: '#fff',

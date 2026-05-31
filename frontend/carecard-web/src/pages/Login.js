@@ -3,9 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { IconMail, IconLock, IconEye, IconEyeOff, IconAlertCircle } from '@tabler/icons-react';
 import CareCardLogo from '../components/CareCardLogo';
 
-const VALID_EMAIL = 'ansatt@carecard.no';
-const VALID_PASSWORD = 'CareCard123';
-const MAX_ATTEMPTS = 5;
+const BRUKERE = [
+  { epost: 'ansatt@carecard.no', passord: 'CareCard123', rolle: 'ansatt', navn: 'Madalitso Skjelnes' },
+  { epost: 'sykepleier@carecard.no', passord: 'CareCard123', rolle: 'sykepleier', navn: 'Marit Olsen' },
+  { epost: 'leder@carecard.no', passord: 'CareCard123', rolle: 'leder', navn: 'Kari Nordmann' },
+];
+
+const MAX_FORSOK = 5;
 const LOCK_DURATION_MS = 15 * 60 * 1000;
 
 const colors = {
@@ -20,51 +24,65 @@ const colors = {
 
 function Login() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [epost, setEpost] = useState('');
+  const [passord, setPassord] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [attempts, setAttempts] = useState(0);
-  const [locked, setLocked] = useState(false);
+  const [feilMelding, setFeilMelding] = useState('');
+  const [forsok, setForsok] = useState(0);
+  const [lastet, setLastet] = useState(false);
   const lockTimerRef = useRef(null);
 
-  const handleEmailChange = (e) => {
-    setEmail(e.target.value);
-    if (error) setError('');
+  const handleEpostChange = (e) => {
+    setEpost(e.target.value);
+    if (feilMelding) setFeilMelding('');
   };
 
-  const handlePasswordChange = (e) => {
-    setPassword(e.target.value);
-    if (error) setError('');
+  const handlePassordChange = (e) => {
+    setPassord(e.target.value);
+    if (feilMelding) setFeilMelding('');
+  };
+
+  const handleLogin = () => {
+    if (lastet) return;
+
+    if (!epost.trim() || !passord) {
+      setFeilMelding('Fyll inn epost og passord.');
+      return;
+    }
+
+    const bruker = BRUKERE.find(
+      (b) => b.epost === epost && b.passord === passord
+    );
+
+    if (bruker) {
+      localStorage.setItem('innlogget', 'true');
+      localStorage.setItem('rolle', bruker.rolle);
+      localStorage.setItem('navn', bruker.navn);
+      setForsok(0);
+      setFeilMelding('');
+      navigate('/avdelingsvalg');
+    } else {
+      const nyttForsok = forsok + 1;
+      setForsok(nyttForsok);
+
+      if (nyttForsok >= MAX_FORSOK) {
+        setLastet(true);
+        setFeilMelding(`Kontoen er låst etter ${MAX_FORSOK} forsøk. Prøv igjen om 15 minutter.`);
+        if (lockTimerRef.current) clearTimeout(lockTimerRef.current);
+        lockTimerRef.current = setTimeout(() => {
+          setLastet(false);
+          setForsok(0);
+          setFeilMelding('');
+        }, LOCK_DURATION_MS);
+      } else {
+        setFeilMelding(`Feil epost eller passord – prøv igjen. (${nyttForsok}/${MAX_FORSOK} forsøk)`);
+      }
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (locked) return;
-
-    if (email === VALID_EMAIL && password === VALID_PASSWORD) {
-      setAttempts(0);
-      setError('');
-      localStorage.setItem('innlogget', 'true');
-      navigate('/avdelingsvalg');
-      return;
-    }
-
-    const newAttempts = attempts + 1;
-    setAttempts(newAttempts);
-
-    if (newAttempts >= MAX_ATTEMPTS) {
-      setLocked(true);
-      setError('Kontoen er låst etter 5 forsøk. Prøv igjen om 15 minutter.');
-      if (lockTimerRef.current) clearTimeout(lockTimerRef.current);
-      lockTimerRef.current = setTimeout(() => {
-        setLocked(false);
-        setAttempts(0);
-        setError('');
-      }, LOCK_DURATION_MS);
-    } else {
-      setError(`Feil epost eller passord – prøv igjen. (${newAttempts}/${MAX_ATTEMPTS} forsøk)`);
-    }
+    handleLogin();
   };
 
   return (
@@ -79,10 +97,10 @@ function Login() {
       </div>
 
       <form onSubmit={handleSubmit} style={styles.form}>
-        {error && (
+        {feilMelding && (
           <div style={styles.errorBox}>
             <IconAlertCircle size={18} color={colors.alertRedText} style={{ flexShrink: 0 }} />
-            <span>{error}</span>
+            <span>{feilMelding}</span>
           </div>
         )}
 
@@ -92,11 +110,11 @@ function Login() {
             <IconMail size={18} color={colors.textMuted} style={styles.inputIcon} />
             <input
               type="email"
-              value={email}
-              onChange={handleEmailChange}
+              value={epost}
+              onChange={handleEpostChange}
               placeholder="ansatt@carecard.no"
               style={styles.input}
-              disabled={locked}
+              disabled={lastet}
             />
           </div>
         </div>
@@ -107,17 +125,17 @@ function Login() {
             <IconLock size={18} color={colors.textMuted} style={styles.inputIcon} />
             <input
               type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={handlePasswordChange}
+              value={passord}
+              onChange={handlePassordChange}
               placeholder="••••••••"
               style={{ ...styles.input, paddingRight: 44 }}
-              disabled={locked}
+              disabled={lastet}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               style={styles.eyeButton}
-              disabled={locked}
+              disabled={lastet}
               tabIndex={-1}
             >
               {showPassword ? (
@@ -137,14 +155,14 @@ function Login() {
 
         <button
           type="submit"
-          disabled={locked}
+          disabled={lastet}
           style={{
             ...styles.submitButton,
-            opacity: locked ? 0.5 : 1,
-            cursor: locked ? 'not-allowed' : 'pointer',
+            opacity: lastet ? 0.5 : 1,
+            cursor: lastet ? 'not-allowed' : 'pointer',
           }}
         >
-          {locked ? 'Kontoen er låst' : 'Logg inn'}
+          {lastet ? 'Kontoen er låst' : 'Logg inn'}
         </button>
       </form>
     </div>
