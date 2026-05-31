@@ -56,15 +56,6 @@ function SectionBox({ title, children, variant = 'default', icon }) {
   );
 }
 
-function InfoField({ label, value, fullWidth }) {
-  return (
-    <div style={{ ...styles.infoField, gridColumn: fullWidth ? '1 / -1' : undefined }}>
-      <span style={styles.infoLabel}>{label}</span>
-      <span style={styles.infoValue}>{value}</span>
-    </div>
-  );
-}
-
 function Pasientkort() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -79,7 +70,66 @@ function Pasientkort() {
   };
 
   const [activeTab, setActiveTab] = useState('matprofil');
+  const [aktivtFelt, setAktivtFelt] = useState(null);
+  const [nyVerdi, setNyVerdi] = useState('');
+  const [visToast, setVisToast] = useState(false);
   const data = ASTRID_DATA;
+
+  const RedigerbartFelt = ({ feltNavn, label, ikon, verdi, toKolonner }) => {
+    const erAktiv = aktivtFelt === feltNavn;
+
+    return (
+      <div style={{ ...styles.kort, ...(toKolonner ? {} : {}) }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+          <p style={styles.kortLabel}>{ikon} {label}</p>
+          <IconPencil
+            size={14}
+            color="#6B7280"
+            style={{ cursor: 'pointer', flexShrink: 0 }}
+            onClick={() => {
+              setAktivtFelt(erAktiv ? null : feltNavn);
+              setNyVerdi(verdi);
+            }}
+          />
+        </div>
+
+        {!erAktiv && (
+          <p style={styles.kortText}>{verdi}</p>
+        )}
+
+        {erAktiv && (
+          <div>
+            <textarea
+              style={styles.tekstfelt}
+              value={nyVerdi}
+              onChange={(e) => setNyVerdi(e.target.value)}
+              rows={3}
+            />
+            <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+              <button
+                type="button"
+                style={styles.avbrytKnapp}
+                onClick={() => setAktivtFelt(null)}
+              >
+                Avbryt
+              </button>
+              <button
+                type="button"
+                style={styles.sendKnapp}
+                onClick={() => {
+                  setVisToast(true);
+                  setAktivtFelt(null);
+                  setTimeout(() => setVisToast(false), 3000);
+                }}
+              >
+                Send forslag ✓
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div style={styles.page}>
@@ -161,33 +211,74 @@ function Pasientkort() {
             </ul>
           </SectionBox>
 
-          <SectionBox title="Fortykningsbehov" variant="yellow">
-            <p style={styles.boxText}>{data.fortykningsbehov}</p>
-          </SectionBox>
+          <RedigerbartFelt
+            feltNavn="fortykningsbehov"
+            label="Fortykningsbehov"
+            ikon={null}
+            verdi={data.fortykningsbehov}
+          />
 
           <div style={styles.grid}>
-            <InfoField label="Kaffe/Te" value={data.kaffeTe} />
-            <InfoField label="Drikke" value={data.drikke} />
+            <RedigerbartFelt
+              feltNavn="kaffeTe"
+              label="Kaffe/Te"
+              ikon={null}
+              verdi={data.kaffeTe}
+              toKolonner
+            />
+            <RedigerbartFelt
+              feltNavn="drikke"
+              label="Drikke"
+              ikon={null}
+              verdi={data.drikke}
+              toKolonner
+            />
           </div>
 
-          <InfoField label="Frokost" value={data.frokost} fullWidth />
+          <RedigerbartFelt
+            feltNavn="frokost"
+            label="Frokost"
+            ikon={null}
+            verdi={data.frokost}
+          />
 
-          <SectionBox title="Kveldsmat" icon={<IconMoon size={16} color="#13171F" />}>
-            <p style={styles.boxText}>{data.kveldsmat}</p>
-          </SectionBox>
+          <RedigerbartFelt
+            feltNavn="kveldsmat"
+            label="Kveldsmat"
+            ikon={<IconMoon size={14} color="#6B7280" />}
+            verdi={data.kveldsmat}
+          />
 
           <div style={styles.grid}>
-            <InfoField label="Konsistens mat" value={data.konsistensMat} />
-            <InfoField label="Hvor spiser" value={data.hvorSpiser} />
+            <RedigerbartFelt
+              feltNavn="konsistensMat"
+              label="Konsistens mat"
+              ikon={null}
+              verdi={data.konsistensMat}
+              toKolonner
+            />
+            <RedigerbartFelt
+              feltNavn="hvorSpiser"
+              label="Hvor spiser"
+              ikon={null}
+              verdi={data.hvorSpiser}
+              toKolonner
+            />
           </div>
 
-          <SectionBox title="Redskap" icon={<IconToolsKitchen2 size={16} color="#13171F" />}>
-            <p style={styles.boxText}>{data.redskap}</p>
-          </SectionBox>
+          <RedigerbartFelt
+            feltNavn="redskap"
+            label="Redskap"
+            ikon={<IconToolsKitchen2 size={14} color="#6B7280" />}
+            verdi={data.redskap}
+          />
 
-          <SectionBox title="Liker ikke" icon={<IconX size={16} color="#13171F" />}>
-            <p style={styles.boxText}>{data.likerIkke}</p>
-          </SectionBox>
+          <RedigerbartFelt
+            feltNavn="likerIkke"
+            label="Liker ikke"
+            ikon={<IconX size={14} color="#6B7280" />}
+            verdi={data.likerIkke}
+          />
 
           <div style={styles.lastChanged}>
             <IconClock size={14} color="#6B7280" />
@@ -200,10 +291,30 @@ function Pasientkort() {
 
       {activeTab === 'stellprofil' && (
         <div style={styles.tabContent}>
-          <InfoField label="Stellpreferanser" value={data.stellpreferanser} fullWidth />
-          <InfoField label="Kommunikasjonsbehov" value={data.kommunikasjonsbehov} fullWidth />
-          <InfoField label="Viktige hensyn" value={data.viktigeHensyn} fullWidth />
-          <InfoField label="Rutiner" value={data.rutiner} fullWidth />
+          <RedigerbartFelt
+            feltNavn="stellpreferanser"
+            label="Stellpreferanser"
+            ikon={null}
+            verdi={data.stellpreferanser}
+          />
+          <RedigerbartFelt
+            feltNavn="kommunikasjonsbehov"
+            label="Kommunikasjonsbehov"
+            ikon={null}
+            verdi={data.kommunikasjonsbehov}
+          />
+          <RedigerbartFelt
+            feltNavn="viktigeHensyn"
+            label="Viktige hensyn"
+            ikon={null}
+            verdi={data.viktigeHensyn}
+          />
+          <RedigerbartFelt
+            feltNavn="rutiner"
+            label="Rutiner"
+            ikon={null}
+            verdi={data.rutiner}
+          />
 
           <div style={styles.lastChanged}>
             <IconClock size={14} color="#6B7280" />
@@ -211,6 +322,12 @@ function Pasientkort() {
           </div>
 
           <button style={styles.suggestButton}>Foreslå endring</button>
+        </div>
+      )}
+
+      {visToast && (
+        <div style={styles.toast}>
+          ✓ Forslag sendt til godkjenning
         </div>
       )}
     </div>
@@ -366,27 +483,6 @@ const styles = {
     gridTemplateColumns: '1fr 1fr',
     gap: 10,
   },
-  infoField: {
-    padding: '14px 16px',
-    backgroundColor: '#F9FAFB',
-    border: '1px solid #E5E7EB',
-    borderRadius: 12,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 6,
-  },
-  infoLabel: {
-    fontSize: 12,
-    fontWeight: 600,
-    color: '#6B7280',
-    textTransform: 'uppercase',
-    letterSpacing: 0.3,
-  },
-  infoValue: {
-    fontSize: 14,
-    color: '#13171F',
-    lineHeight: 1.5,
-  },
   lastChanged: {
     display: 'flex',
     alignItems: 'center',
@@ -407,6 +503,75 @@ const styles = {
     cursor: 'pointer',
     fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
     marginTop: 4,
+  },
+  kort: {
+    padding: '14px 16px',
+    backgroundColor: '#F9FAFB',
+    border: '1px solid #E5E7EB',
+    borderRadius: 12,
+  },
+  kortLabel: {
+    fontSize: 12,
+    fontWeight: 600,
+    color: '#6B7280',
+    margin: 0,
+  },
+  kortText: {
+    margin: 0,
+    fontSize: 14,
+    lineHeight: 1.5,
+    color: '#13171F',
+  },
+  tekstfelt: {
+    width: '100%',
+    padding: '10px 12px',
+    borderRadius: '10px',
+    border: '1px solid #185FA5',
+    fontSize: '14px',
+    color: '#13171F',
+    fontFamily: 'Manrope, sans-serif',
+    outline: 'none',
+    resize: 'none',
+    boxSizing: 'border-box',
+    background: '#F9FAFB',
+  },
+  avbrytKnapp: {
+    flex: 1,
+    padding: '8px',
+    borderRadius: '10px',
+    border: '1px solid #E5E7EB',
+    background: '#F9FAFB',
+    fontSize: '13px',
+    fontWeight: '500',
+    color: '#6B7280',
+    cursor: 'pointer',
+    fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
+  },
+  sendKnapp: {
+    flex: 2,
+    padding: '8px',
+    borderRadius: '10px',
+    border: 'none',
+    background: '#185FA5',
+    fontSize: '13px',
+    fontWeight: '600',
+    color: '#fff',
+    cursor: 'pointer',
+    fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
+  },
+  toast: {
+    position: 'fixed',
+    bottom: '32px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    background: '#13171F',
+    color: '#fff',
+    padding: '12px 24px',
+    borderRadius: '12px',
+    fontSize: '14px',
+    fontWeight: '500',
+    zIndex: 1000,
+    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
   },
 };
 
