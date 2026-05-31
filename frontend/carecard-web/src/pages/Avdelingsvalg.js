@@ -39,7 +39,7 @@ function Avdelingsvalg() {
       <header style={styles.header}>
         <div>
           <p style={styles.greeting}>{getGreeting()}</p>
-          <h1 style={styles.name}>Madalitso 👋</h1>
+          <h1 style={styles.name}>Kemilly 👋</h1>
           <p style={styles.date}>{formatDate()}</p>
         </div>
         <div style={styles.avatar}>MS</div>
