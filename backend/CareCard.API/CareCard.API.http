@@ -1,0 +1,6 @@
+@CareCard.API_HostAddress = http://localhost:5014
+
+GET {{CareCard.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
