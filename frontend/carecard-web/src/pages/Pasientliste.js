@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { IconChevronLeft, IconSearch } from '@tabler/icons-react';
 import Navbar from '../components/Navbar';
+import { useSpråk } from '../hooks/useSprak';
 
 const PASIENTER = [
   { id: 1, fornavn: 'Astrid', etternavn: 'Henriksen', rom: '312', allergi: true, dia: false, fortykning: true },
@@ -12,13 +13,6 @@ const PASIENTER = [
 
 const AVATAR_COLORS = ['#185FA5', '#0F6E56', '#993556', '#534AB7', '#854F0B'];
 
-const FILTERS = [
-  { key: 'alle', label: 'Alle' },
-  { key: 'allergi', label: 'Allergi' },
-  { key: 'dia', label: 'DIA' },
-  { key: 'fortykning', label: 'Fortykning' },
-];
-
 function getInitials(fornavn, etternavn) {
   const f = fornavn.trim().split(' ')[0][0] || '';
   const e = etternavn.trim()[0] || '';
@@ -28,7 +22,15 @@ function getInitials(fornavn, etternavn) {
 function Pasientliste() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useSpråk();
   const avdeling = location.state?.avdeling || { navn: 'Langtidsavdeling', enhetsnummer: 'Avdeling 1' };
+
+  const filters = [
+    { key: 'alle', label: t.alle },
+    { key: 'allergi', label: t.allergi },
+    { key: 'dia', label: t.dia },
+    { key: 'fortykning', label: t.fortykning },
+  ];
 
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState('alle');
@@ -78,7 +80,7 @@ function Pasientliste() {
       </div>
 
       <div style={styles.titleRow}>
-        <h1 style={styles.title}>Pasienter</h1>
+        <h1 style={styles.title}>{t.pasienter}</h1>
         <span style={styles.subtitle}>{avdeling.enhetsnummer}</span>
       </div>
 
@@ -86,7 +88,7 @@ function Pasientliste() {
         <IconSearch size={18} color="#6B7280" style={styles.searchIcon} />
         <input
           type="text"
-          placeholder="Søk etter pasient..."
+          placeholder={t.søkPåNavn}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={styles.searchInput}
@@ -94,7 +96,7 @@ function Pasientliste() {
       </div>
 
       <div style={styles.filterRow}>
-        {FILTERS.map((f) => {
+        {filters.map((f) => {
           const dotColor =
             f.key === 'allergi' ? '#A32D2D' :
             f.key === 'dia' || f.key === 'fortykning' ? '#854F0B' :
@@ -142,11 +144,11 @@ function Pasientliste() {
               <span style={styles.patientName}>
                 {p.fornavn} {p.etternavn}
               </span>
-              <span style={styles.patientRoom}>Rom {p.rom}</span>
+              <span style={styles.patientRoom}>{t.rom} {p.rom}</span>
               <div style={styles.badgeRow}>
-                {p.allergi && <span style={styles.allergiBadge}>Allergi</span>}
-                {p.dia && <span style={styles.warningBadge}>DIA</span>}
-                {p.fortykning && <span style={styles.warningBadge}>Fortykning</span>}
+                {p.allergi && <span style={styles.allergiBadge}>{t.allergi}</span>}
+                {p.dia && <span style={styles.warningBadge}>{t.dia}</span>}
+                {p.fortykning && <span style={styles.warningBadge}>{t.fortykning}</span>}
               </div>
             </div>
           </button>
@@ -154,7 +156,7 @@ function Pasientliste() {
       </div>
 
         <p style={styles.countText}>
-          {filtered.length} aktive pasient{filtered.length !== 1 ? 'er' : ''}
+          {filtered.length} {t.aktivePasienter}
         </p>
       </div>
     </>

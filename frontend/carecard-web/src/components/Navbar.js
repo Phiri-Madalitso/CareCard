@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { IconBell } from '@tabler/icons-react';
 import CareCardLogo from './CareCardLogo';
+import { useSpråk } from '../hooks/useSprak';
 
 function Navbar({ antallVentende = 0 }) {
   const navigate = useNavigate();
+  const { t } = useSpråk();
   const rolle = localStorage.getItem('rolle');
   const skalViseVarsler = rolle === 'sykepleier' || rolle === 'leder';
 
@@ -25,7 +27,7 @@ function Navbar({ antallVentende = 0 }) {
               </div>
             )}
           </div>
-          <span style={styles.varslerLabel}>Varsler</span>
+          <span style={styles.varslerLabel}>{t.varsler}</span>
         </button>
       )}
     </div>

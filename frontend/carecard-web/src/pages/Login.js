@@ -1,7 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IconMail, IconLock, IconEye, IconEyeOff, IconAlertCircle } from '@tabler/icons-react';
+import { IconMail, IconLock, IconEye, IconEyeOff, IconAlertCircle, IconChevronDown } from '@tabler/icons-react';
 import CareCardLogo from '../components/CareCardLogo';
+import { useSpråk } from '../hooks/useSprak';
 
 const BRUKERE = [
   { epost: 'ansatt@carecard.no', passord: 'CareCard123', rolle: 'ansatt', navn: 'Madalitso Skjelnes' },
@@ -11,6 +12,26 @@ const BRUKERE = [
 
 const MAX_FORSOK = 5;
 const LOCK_DURATION_MS = 15 * 60 * 1000;
+
+const SPRÅK_ALTERNATIVER = [
+  { value: 'no', flagKode: 'no', navn: 'Norsk' },
+  { value: 'en', flagKode: 'gb', navn: 'English' },
+  { value: 'es', flagKode: 'es', navn: 'Español' },
+  { value: 'pl', flagKode: 'pl', navn: 'Polski' },
+  { value: 'pt', flagKode: 'br', navn: 'Português (BR)' },
+];
+
+function SpråkFlagg({ kode }) {
+  return (
+    <img
+      src={`https://flagcdn.com/w40/${kode}.png`}
+      alt=""
+      width={20}
+      height={15}
+      style={styles.språkFlaggImg}
+    />
+  );
+}
 
 const colors = {
   teal: '#207383',
@@ -24,29 +45,53 @@ const colors = {
 
 function Login() {
   const navigate = useNavigate();
+  const { språk, setSpråk, t } = useSpråk();
   const [epost, setEpost] = useState('');
   const [passord, setPassord] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [feilMelding, setFeilMelding] = useState('');
+  const [feilEkstra, setFeilEkstra] = useState('');
   const [forsok, setForsok] = useState(0);
   const [lastet, setLastet] = useState(false);
+  const [språkMenyÅpen, setSpråkMenyÅpen] = useState(false);
   const lockTimerRef = useRef(null);
+  const språkMenyRef = useRef(null);
+
+  const valgtSpråk = SPRÅK_ALTERNATIVER.find((s) => s.value === språk) || SPRÅK_ALTERNATIVER[0];
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (språkMenyRef.current && !språkMenyRef.current.contains(e.target)) {
+        setSpråkMenyÅpen(false);
+      }
+    };
+    if (språkMenyÅpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [språkMenyÅpen]);
+
+  const clearFeil = () => {
+    setFeilMelding('');
+    setFeilEkstra('');
+  };
 
   const handleEpostChange = (e) => {
     setEpost(e.target.value);
-    if (feilMelding) setFeilMelding('');
+    if (feilMelding) clearFeil();
   };
 
   const handlePassordChange = (e) => {
     setPassord(e.target.value);
-    if (feilMelding) setFeilMelding('');
+    if (feilMelding) clearFeil();
   };
 
   const handleLogin = () => {
     if (lastet) return;
 
     if (!epost.trim() || !passord) {
-      setFeilMelding('Fyll inn epost og passord.');
+      setFeilMelding('fyllInn');
+      setFeilEkstra('');
       return;
     }
 
@@ -59,7 +104,7 @@ function Login() {
       localStorage.setItem('rolle', bruker.rolle);
       localStorage.setItem('navn', bruker.navn);
       setForsok(0);
-      setFeilMelding('');
+      clearFeil();
       navigate('/avdelingsvalg');
     } else {
       const nyttForsok = forsok + 1;
@@ -67,15 +112,17 @@ function Login() {
 
       if (nyttForsok >= MAX_FORSOK) {
         setLastet(true);
-        setFeilMelding(`Kontoen er låst etter ${MAX_FORSOK} forsøk. Prøv igjen om 15 minutter.`);
+        setFeilMelding('kontoLåstMelding');
+        setFeilEkstra('');
         if (lockTimerRef.current) clearTimeout(lockTimerRef.current);
         lockTimerRef.current = setTimeout(() => {
           setLastet(false);
           setForsok(0);
-          setFeilMelding('');
+          clearFeil();
         }, LOCK_DURATION_MS);
       } else {
-        setFeilMelding(`Feil epost eller passord – prøv igjen. (${nyttForsok}/${MAX_FORSOK} forsøk)`);
+        setFeilMelding('feilEpostPassord');
+        setFeilEkstra(` (${nyttForsok}/${MAX_FORSOK})`);
       }
     }
   };
@@ -91,28 +138,64 @@ function Login() {
         href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap"
         rel="stylesheet"
       />
+      <div style={styles.språkRad} ref={språkMenyRef}>
+        <button
+          type="button"
+          style={styles.språkKnapp}
+          onClick={() => setSpråkMenyÅpen(!språkMenyÅpen)}
+          aria-expanded={språkMenyÅpen}
+          aria-haspopup="listbox"
+        >
+          <SpråkFlagg kode={valgtSpråk.flagKode} />
+          <span>{valgtSpråk.navn}</span>
+          <IconChevronDown size={16} color="#6B7280" />
+        </button>
+        {språkMenyÅpen && (
+          <div style={styles.språkMeny} role="listbox">
+            {SPRÅK_ALTERNATIVER.map((s) => (
+              <button
+                key={s.value}
+                type="button"
+                role="option"
+                aria-selected={språk === s.value}
+                style={{
+                  ...styles.språkMenyValg,
+                  ...(språk === s.value ? styles.språkMenyValgAktiv : {}),
+                }}
+                onClick={() => {
+                  setSpråk(s.value);
+                  setSpråkMenyÅpen(false);
+                }}
+              >
+                <SpråkFlagg kode={s.flagKode} />
+                <span>{s.navn}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
       <div style={styles.logoSection}>
         <CareCardLogo size="lg" />
-        <p style={styles.tagline}>Digitalt matkort for sykehjem</p>
+        <p style={styles.tagline}>{t.tagline}</p>
       </div>
 
       <form onSubmit={handleSubmit} style={styles.form}>
-        {feilMelding && (
+        {feilMelding && t[feilMelding] && (
           <div style={styles.errorBox}>
             <IconAlertCircle size={18} color={colors.alertRedText} style={{ flexShrink: 0 }} />
-            <span>{feilMelding}</span>
+            <span>{t[feilMelding]}{feilEkstra}</span>
           </div>
         )}
 
         <div style={styles.fieldGroup}>
-          <label style={styles.label}>Epost</label>
+          <label style={styles.label}>{t.epost}</label>
           <div style={styles.inputWrapper}>
             <IconMail size={18} color={colors.textMuted} style={styles.inputIcon} />
             <input
               type="email"
               value={epost}
               onChange={handleEpostChange}
-              placeholder="ansatt@carecard.no"
+              placeholder={t.epost}
               style={styles.input}
               disabled={lastet}
             />
@@ -120,14 +203,14 @@ function Login() {
         </div>
 
         <div style={styles.fieldGroup}>
-          <label style={styles.label}>Passord</label>
+          <label style={styles.label}>{t.passord}</label>
           <div style={styles.inputWrapper}>
             <IconLock size={18} color={colors.textMuted} style={styles.inputIcon} />
             <input
               type={showPassword ? 'text' : 'password'}
               value={passord}
               onChange={handlePassordChange}
-              placeholder="••••••••"
+              placeholder={t.passord}
               style={{ ...styles.input, paddingRight: 44 }}
               disabled={lastet}
             />
@@ -149,7 +232,7 @@ function Login() {
 
         <div style={styles.forgotRow}>
           <button type="button" style={styles.forgotLink} onClick={() => {}}>
-            Glemt passord?
+            {t.glemmtPassord}
           </button>
         </div>
 
@@ -162,7 +245,7 @@ function Login() {
             cursor: lastet ? 'not-allowed' : 'pointer',
           }}
         >
-          {lastet ? 'Kontoen er låst' : 'Logg inn'}
+          {lastet ? t.kontoLåst : t.loggInn}
         </button>
       </form>
     </div>
@@ -171,6 +254,7 @@ function Login() {
 
 const styles = {
   page: {
+    position: 'relative',
     fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
     maxWidth: 480,
     margin: '0 auto',
@@ -178,6 +262,60 @@ const styles = {
     minHeight: '100vh',
     boxSizing: 'border-box',
     backgroundColor: '#fff',
+  },
+  språkRad: {
+    position: 'absolute',
+    top: '24px',
+    right: '24px',
+    zIndex: 10,
+  },
+  språkKnapp: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    border: '1px solid #E6E8EC',
+    borderRadius: '8px',
+    padding: '6px 10px',
+    fontSize: '13px',
+    color: '#13171F',
+    background: '#FAFAFB',
+    cursor: 'pointer',
+    fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
+  },
+  språkFlaggImg: {
+    display: 'block',
+    borderRadius: '2px',
+    objectFit: 'cover',
+    flexShrink: 0,
+  },
+  språkMeny: {
+    position: 'absolute',
+    top: 'calc(100% + 4px)',
+    right: 0,
+    minWidth: '140px',
+    background: '#FFFFFF',
+    border: '1px solid #E6E8EC',
+    borderRadius: '8px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+    overflow: 'hidden',
+  },
+  språkMenyValg: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    width: '100%',
+    padding: '10px 12px',
+    border: 'none',
+    background: '#FFFFFF',
+    fontSize: '13px',
+    color: '#13171F',
+    cursor: 'pointer',
+    textAlign: 'left',
+    fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
+  },
+  språkMenyValgAktiv: {
+    background: '#F0F7FF',
+    color: '#185FA5',
   },
   logoSection: {
     display: 'flex',

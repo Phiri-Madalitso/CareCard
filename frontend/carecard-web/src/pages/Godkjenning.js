@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IconChevronLeft, IconCheck, IconX } from '@tabler/icons-react';
 import Navbar from '../components/Navbar';
+import { useSpråk } from '../hooks/useSprak';
 
 const HARDKODEDE_FORSLAG = [
   {
@@ -38,6 +39,7 @@ const HARDKODEDE_FORSLAG = [
 
 function Godkjenning() {
   const navigate = useNavigate();
+  const { t } = useSpråk();
   const [forslag, setForslag] = useState(HARDKODEDE_FORSLAG);
   const [kommentar, setKommentar] = useState({});
   const [visKommentar, setVisKommentar] = useState(null);
@@ -45,14 +47,14 @@ function Godkjenning() {
 
   const godkjenn = (id) => {
     setForslag((prev) => prev.filter((f) => f.id !== id));
-    setVisToast('✓ Endring godkjent og oppdatert!');
+    setVisToast('endringGodkjent');
     setTimeout(() => setVisToast(''), 3000);
   };
 
   const avvis = (id) => {
     setForslag((prev) => prev.filter((f) => f.id !== id));
     setVisKommentar(null);
-    setVisToast('Forslag avvist.');
+    setVisToast('forslagAvvist');
     setTimeout(() => setVisToast(''), 3000);
   };
 
@@ -68,17 +70,17 @@ function Godkjenning() {
             onClick={() => navigate(-1)}
             style={{ cursor: 'pointer' }}
           />
-          <p style={styles.tittel}>Til godkjenning</p>
+          <p style={styles.tittel}>{t.tilGodkjenning}</p>
           <div style={{ width: 22 }} />
         </div>
 
         <p style={styles.undertittel}>
-          {forslag.length} forslag venter – eldste først
+          {forslag.length} {t.eldsteForst}
         </p>
 
         {forslag.length === 0 && (
           <div style={styles.tom}>
-            <p>🎉 Ingen forslag venter på godkjenning!</p>
+            <p>{t.ingenForslag}</p>
           </div>
         )}
 
@@ -92,16 +94,16 @@ function Godkjenning() {
               <span style={styles.datoBadge}>{f.dato}</span>
             </div>
 
-            <p style={styles.sendtAv}>Sendt av {f.sendtAv}</p>
+            <p style={styles.sendtAv}>{t.sendtAv} {f.sendtAv}</p>
 
             <div style={styles.endringRad}>
               <div style={styles.gammel}>
-                <p style={styles.endringLabel}>Gammel</p>
+                <p style={styles.endringLabel}>{t.gammel}</p>
                 <p style={styles.endringTekst}>{f.gammelVerdi}</p>
               </div>
               <div style={styles.pil}>→</div>
               <div style={styles.ny}>
-                <p style={styles.endringLabel}>Ny</p>
+                <p style={styles.endringLabel}>{t.ny}</p>
                 <p style={styles.endringTekst}>{f.nyVerdi}</p>
               </div>
             </div>
@@ -109,7 +111,7 @@ function Godkjenning() {
             {visKommentar === f.id && (
               <textarea
                 style={styles.tekstfelt}
-                placeholder="Skriv begrunnelse for avvisning..."
+                placeholder={t.skrivBegrunnelse}
                 value={kommentar[f.id] || ''}
                 onChange={(e) => setKommentar((prev) => ({ ...prev, [f.id]: e.target.value }))}
                 rows={2}
@@ -122,23 +124,23 @@ function Godkjenning() {
                 style={styles.avvisKnapp}
                 onClick={() => (visKommentar === f.id ? avvis(f.id) : setVisKommentar(f.id))}
               >
-                <IconX size={14} /> {visKommentar === f.id ? 'Send avvisning' : 'Avvis'}
+                <IconX size={14} /> {visKommentar === f.id ? t.sendAvvisning : t.avvis}
               </button>
               <button
                 type="button"
                 style={styles.godkjennKnapp}
                 onClick={() => godkjenn(f.id)}
               >
-                <IconCheck size={14} /> Godkjenn
+                <IconCheck size={14} /> {t.godkjenn}
               </button>
             </div>
           </div>
         ))}
       </div>
 
-      {visToast && (
+      {visToast && t[visToast] && (
         <div style={styles.toast}>
-          {visToast}
+          {t[visToast]}
         </div>
       )}
     </div>

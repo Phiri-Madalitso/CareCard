@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IconChevronRight, IconLogout } from '@tabler/icons-react';
 import Navbar from '../components/Navbar';
+import { useSpråk, getHilsenKey, formatDato, getInitialer } from '../hooks/useSprak';
 
 const AVDELINGER = [
   { id: 1, navn: 'Langtidsavdeling', enhetsnummer: 'Avdeling 1' },
@@ -9,26 +10,11 @@ const AVDELINGER = [
   { id: 3, navn: 'Skjermet', enhetsnummer: 'Avdeling 3' },
 ];
 
-function getGreeting() {
-  const hour = new Date().getHours();
-  if (hour >= 6 && hour < 12) return 'God morgen';
-  if (hour >= 12 && hour < 18) return 'God dag';
-  return 'God kveld';
-}
-
-function formatDate() {
-  const date = new Date();
-  const formatted = date.toLocaleDateString('nb-NO', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
-}
-
 function Avdelingsvalg() {
   const navigate = useNavigate();
+  const { t, locale } = useSpråk();
+  const brukerNavn = localStorage.getItem('navn') || 'Bruker';
+  const fornavn = brukerNavn.split(' ')[0];
 
   const handleLoggUt = () => {
     localStorage.removeItem('innlogget');
@@ -48,20 +34,20 @@ function Avdelingsvalg() {
 
         <header style={styles.header}>
           <div>
-            <p style={styles.greeting}>{getGreeting()},</p>
-            <h1 style={styles.name}>Madalitso 👋</h1>
-            <p style={styles.date}>{formatDate()}</p>
+            <p style={styles.greeting}>{t[getHilsenKey()]},</p>
+            <h1 style={styles.name}>{fornavn} 👋</h1>
+            <p style={styles.date}>{formatDato(locale)}</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <button type="button" onClick={handleLoggUt} style={styles.loggUtKnapp}>
               <IconLogout size={22} stroke={1.75} color="#13171F" />
-              <span>Logg ut</span>
+              <span>{t.loggUt}</span>
             </button>
-            <div style={styles.avatar}>MS</div>
+            <div style={styles.avatar}>{getInitialer(brukerNavn)}</div>
           </div>
         </header>
 
-        <h2 style={styles.question}>Hvilken avdeling jobber du på i dag?</h2>
+        <h2 style={styles.question}>{t.hvilkenAvdeling}</h2>
 
         <div style={styles.cardList}>
           {AVDELINGER.map((avdeling) => (

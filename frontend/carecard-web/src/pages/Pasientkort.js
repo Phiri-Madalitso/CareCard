@@ -11,6 +11,7 @@ import {
   IconClock,
 } from '@tabler/icons-react';
 import Navbar from '../components/Navbar';
+import { useSpråk } from '../hooks/useSprak';
 
 const ASTRID_DATA = {
   allergier: ['Nøtter (alle typer)', 'Skalldyr'],
@@ -60,6 +61,7 @@ function SectionBox({ title, children, variant = 'default', icon }) {
 function Pasientkort() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useSpråk();
   const pasient = location.state?.pasient || {
     id: 1,
     fornavn: 'Astrid',
@@ -112,7 +114,7 @@ function Pasientkort() {
                 style={styles.avbrytKnapp}
                 onClick={() => setAktivtFelt(null)}
               >
-                Avbryt
+                {t.avbryt}
               </button>
               <button
                 type="button"
@@ -123,7 +125,7 @@ function Pasientkort() {
                   setTimeout(() => setVisToast(false), 3000);
                 }}
               >
-                Send forslag ✓
+                {t.sendForslag}
               </button>
             </div>
           </div>
@@ -145,7 +147,7 @@ function Pasientkort() {
         <button style={styles.iconButton} onClick={() => navigate(-1)}>
           <IconChevronLeft size={22} color="#13171F" />
         </button>
-        <span style={styles.topbarTitle}>Pasientkort</span>
+        <span style={styles.topbarTitle}>{t.pasientkort}</span>
         <button style={styles.iconButton}>
           <IconPencil size={20} color="#13171F" />
         </button>
@@ -160,7 +162,7 @@ function Pasientkort() {
             {pasient.fornavn} {pasient.etternavn}
           </h1>
           <p style={styles.patientMeta}>
-            Rom {pasient.rom} · Langtidsplass
+            {t.rom} {pasient.rom} · {t.langtidsplass}
           </p>
         </div>
       </div>
@@ -169,17 +171,17 @@ function Pasientkort() {
         {pasient.allergi && (
           <span style={styles.allergiBadge}>
             <IconAlertTriangle size={14} />
-            Allergi
+            {t.allergi}
           </span>
         )}
         {pasient.fortykning && (
           <span style={styles.warningBadge}>
             <IconGlass size={14} />
-            Fortykning
+            {t.fortykning}
           </span>
         )}
         {pasient.dia && (
-          <span style={styles.warningBadge}>DIA</span>
+          <span style={styles.warningBadge}>{t.dia}</span>
         )}
       </div>
 
@@ -191,7 +193,7 @@ function Pasientkort() {
           }}
           onClick={() => setActiveTab('matprofil')}
         >
-          Matprofil
+          {t.matprofil}
         </button>
         <button
           style={{
@@ -200,13 +202,13 @@ function Pasientkort() {
           }}
           onClick={() => setActiveTab('stellprofil')}
         >
-          Stellprofil
+          {t.stellprofil}
         </button>
       </div>
 
       {activeTab === 'matprofil' && (
         <div style={styles.tabContent}>
-          <SectionBox title="Allergier" variant="red">
+          <SectionBox title={t.allergier} variant="red">
             <ul style={styles.bulletList}>
               {data.allergier.map((a) => (
                 <li key={a}>{a}</li>
@@ -216,7 +218,7 @@ function Pasientkort() {
 
           <RedigerbartFelt
             feltNavn="fortykningsbehov"
-            label="Fortykningsbehov"
+            label={t.fortykningsbehov}
             ikon={null}
             verdi={data.fortykningsbehov}
           />
@@ -224,14 +226,14 @@ function Pasientkort() {
           <div style={styles.grid}>
             <RedigerbartFelt
               feltNavn="kaffeTe"
-              label="Kaffe/Te"
+              label={t.kaffeTe}
               ikon={null}
               verdi={data.kaffeTe}
               toKolonner
             />
             <RedigerbartFelt
               feltNavn="drikke"
-              label="Drikke"
+              label={t.drikke}
               ikon={null}
               verdi={data.drikke}
               toKolonner
@@ -240,14 +242,14 @@ function Pasientkort() {
 
           <RedigerbartFelt
             feltNavn="frokost"
-            label="Frokost"
+            label={t.frokost}
             ikon={null}
             verdi={data.frokost}
           />
 
           <RedigerbartFelt
             feltNavn="kveldsmat"
-            label="Kveldsmat"
+            label={t.kveldsmat}
             ikon={<IconMoon size={14} color="#6B7280" />}
             verdi={data.kveldsmat}
           />
@@ -255,14 +257,14 @@ function Pasientkort() {
           <div style={styles.grid}>
             <RedigerbartFelt
               feltNavn="konsistensMat"
-              label="Konsistens mat"
+              label={t.konsistensMat}
               ikon={null}
               verdi={data.konsistensMat}
               toKolonner
             />
             <RedigerbartFelt
               feltNavn="hvorSpiser"
-              label="Hvor spiser"
+              label={t.hvorSpiser}
               ikon={null}
               verdi={data.hvorSpiser}
               toKolonner
@@ -271,24 +273,24 @@ function Pasientkort() {
 
           <RedigerbartFelt
             feltNavn="redskap"
-            label="Redskap"
+            label={t.redskap}
             ikon={<IconToolsKitchen2 size={14} color="#6B7280" />}
             verdi={data.redskap}
           />
 
           <RedigerbartFelt
             feltNavn="likerIkke"
-            label="Liker ikke"
+            label={t.likerIkke}
             ikon={<IconX size={14} color="#6B7280" />}
             verdi={data.likerIkke}
           />
 
           <div style={styles.lastChanged}>
             <IconClock size={14} color="#6B7280" />
-            <span>Sist endret: {data.sistEndret}</span>
+            <span>{t.sistEndret}: {data.sistEndret}</span>
           </div>
 
-          <button style={styles.suggestButton}>Foreslå endring</button>
+          <button type="button" style={styles.suggestButton}>{t.foreslåEndring}</button>
         </div>
       )}
 
@@ -296,41 +298,41 @@ function Pasientkort() {
         <div style={styles.tabContent}>
           <RedigerbartFelt
             feltNavn="stellpreferanser"
-            label="Stellpreferanser"
+            label={t.stellpreferanser}
             ikon={null}
             verdi={data.stellpreferanser}
           />
           <RedigerbartFelt
             feltNavn="kommunikasjonsbehov"
-            label="Kommunikasjonsbehov"
+            label={t.kommunikasjonsbehov}
             ikon={null}
             verdi={data.kommunikasjonsbehov}
           />
           <RedigerbartFelt
             feltNavn="viktigeHensyn"
-            label="Viktige hensyn"
+            label={t.viktigeHensyn}
             ikon={null}
             verdi={data.viktigeHensyn}
           />
           <RedigerbartFelt
             feltNavn="rutiner"
-            label="Rutiner"
+            label={t.rutiner}
             ikon={null}
             verdi={data.rutiner}
           />
 
           <div style={styles.lastChanged}>
             <IconClock size={14} color="#6B7280" />
-            <span>Sist endret: {data.sistEndret}</span>
+            <span>{t.sistEndret}: {data.sistEndret}</span>
           </div>
 
-          <button style={styles.suggestButton}>Foreslå endring</button>
+          <button type="button" style={styles.suggestButton}>{t.foreslåEndring}</button>
         </div>
       )}
 
         {visToast && (
           <div style={styles.toast}>
-            ✓ Forslag sendt til godkjenning
+            {t.forslagSendt}
           </div>
         )}
       </div>
