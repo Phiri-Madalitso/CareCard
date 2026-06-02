@@ -1,15 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { IconChevronLeft, IconSearch } from '@tabler/icons-react';
 import Navbar from '../components/Navbar';
 import { useSpråk } from '../hooks/useSprak';
-
-const PASIENTER = [
-  { id: 1, fornavn: 'Astrid', etternavn: 'Henriksen', rom: '312', allergi: true, dia: false, fortykning: true },
-  { id: 2, fornavn: 'Olav', etternavn: 'Berg', rom: '308', allergi: false, dia: true, fortykning: false },
-  { id: 3, fornavn: 'Inger Lise', etternavn: 'Dahl', rom: '305', allergi: true, dia: false, fortykning: false },
-  { id: 4, fornavn: 'Kåre', etternavn: 'Solberg', rom: '314', allergi: false, dia: false, fortykning: true },
-];
+import { hentPasienter } from '../services/pasientService';
 
 const AVATAR_COLORS = ['#185FA5', '#0F6E56', '#993556', '#534AB7', '#854F0B'];
 
@@ -23,7 +17,7 @@ function Pasientliste() {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useSpråk();
-  const avdeling = location.state?.avdeling || { navn: 'Langtidsavdeling', enhetsnummer: 'Avdeling 1' };
+  const avdeling = location.state?.avdeling || { id: 1, navn: 'Langtidsavdeling', enhetsnummer: 'Avdeling 1' };
 
   const filters = [
     { key: 'alle', label: t.alle },
@@ -32,18 +26,51 @@ function Pasientliste() {
     { key: 'fortykning', label: t.fortykning },
   ];
 
+  const [pasienter, setPasienter] = useState([]);
+  const [laster, setLaster] = useState(true);
+  const [feil, setFeil] = useState('');
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState('alle');
 
+  useEffect(() => {
+    let avbrutt = false;
+
+    async function lastPasienter() {
+      setLaster(true);
+      setFeil('');
+
+      try {
+        const data = await hentPasienter(avdeling.id);
+        if (!avbrutt) {
+          setPasienter(data);
+        }
+      } catch {
+        if (!avbrutt) {
+          setFeil('Kunne ikke hente pasienter. Sjekk at API-et kjører (F5 i Visual Studio).');
+        }
+      } finally {
+        if (!avbrutt) {
+          setLaster(false);
+        }
+      }
+    }
+
+    lastPasienter();
+
+    return () => {
+      avbrutt = true;
+    };
+  }, [avdeling.id]);
+
   const filterCounts = useMemo(() => ({
-    alle: PASIENTER.length,
-    allergi: PASIENTER.filter((p) => p.allergi).length,
-    dia: PASIENTER.filter((p) => p.dia).length,
-    fortykning: PASIENTER.filter((p) => p.fortykning).length,
-  }), []);
+    alle: pasienter.length,
+    allergi: pasienter.filter((p) => p.allergi).length,
+    dia: pasienter.filter((p) => p.dia).length,
+    fortykning: pasienter.filter((p) => p.fortykning).length,
+  }), [pasienter]);
 
   const filtered = useMemo(() => {
-    let list = PASIENTER;
+    let list = pasienter;
 
     if (activeFilter === 'allergi') list = list.filter((p) => p.allergi);
     else if (activeFilter === 'dia') list = list.filter((p) => p.dia);
@@ -60,7 +87,29 @@ function Pasientliste() {
     }
 
     return list;
-  }, [search, activeFilter]);
+  }, [search, activeFilter, pasienter]);
+
+  if (laster) {
+    return (
+      <>
+        <Navbar antallVentende={2} />
+        <div style={styles.page}>
+          <p style={styles.statusText}>Laster pasienter...</p>
+        </div>
+      </>
+    );
+  }
+
+  if (feil) {
+    return (
+      <>
+        <Navbar antallVentende={2} />
+        <div style={styles.page}>
+          <p style={styles.errorText}>{feil}</p>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -326,6 +375,19 @@ const styles = {
     fontSize: 13,
     color: '#6B7280',
     textAlign: 'center',
+  },
+  statusText: {
+    marginTop: 40,
+    fontSize: 15,
+    color: '#6B7280',
+    textAlign: 'center',
+  },
+  errorText: {
+    marginTop: 40,
+    fontSize: 15,
+    color: '#A32D2D',
+    textAlign: 'center',
+    lineHeight: 1.5,
   },
 };
 
