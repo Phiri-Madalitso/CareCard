@@ -92,7 +92,7 @@ function Pasientliste() {
   if (laster) {
     return (
       <>
-        <Navbar antallVentende={2} />
+        <Navbar />
         <div style={styles.page}>
           <p style={styles.statusText}>Laster pasienter...</p>
         </div>
@@ -103,7 +103,7 @@ function Pasientliste() {
   if (feil) {
     return (
       <>
-        <Navbar antallVentende={2} />
+        <Navbar />
         <div style={styles.page}>
           <p style={styles.errorText}>{feil}</p>
         </div>
@@ -113,7 +113,7 @@ function Pasientliste() {
 
   return (
     <>
-      <Navbar antallVentende={2} />
+      <Navbar />
       <div style={styles.page}>
         <link
           href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap"

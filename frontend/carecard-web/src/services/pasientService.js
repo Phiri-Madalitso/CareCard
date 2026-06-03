@@ -1,14 +1,5 @@
 import { API_BASE_URL } from '../config/api';
-
-async function hentMatprofil(pasientId) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/Matprofil/pasient/${pasientId}`);
-    if (!response.ok) return null;
-    return response.json();
-  } catch {
-    return null;
-  }
-}
+import { hentMatprofil } from './profilService';
 
 export async function hentPasienter(avdelingId) {
   const response = await fetch(`${API_BASE_URL}/api/Pasient`);

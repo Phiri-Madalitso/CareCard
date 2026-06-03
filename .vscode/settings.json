@@ -1,0 +1,6 @@
+{
+  "terminal.integrated.inheritEnv": true,
+  "terminal.integrated.env.windows": {
+    "Path": "${env:Path};C:\\Program Files\\dotnet;C:\\Program Files\\nodejs;${env:USERPROFILE}\\.dotnet\\tools"
+  }
+}

@@ -1,4 +1,5 @@
-﻿using CareCard.API.Data;
+﻿using System.Reflection;
+using CareCard.API.Data;
 using CareCard.API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,6 @@ namespace CareCard.API.Controllers
             _context = context;
         }
 
-        // GET api/endringsforslag/venter
         [HttpGet("venter")]
         public async Task<ActionResult<IEnumerable<EndringsForslag>>> HentVentende()
         {
@@ -27,7 +27,6 @@ namespace CareCard.API.Controllers
                 .ToListAsync();
         }
 
-        // POST api/endringsforslag
         [HttpPost]
         public async Task<ActionResult<EndringsForslag>> OpprettForslag(EndringsForslag forslag)
         {
@@ -40,7 +39,6 @@ namespace CareCard.API.Controllers
             return CreatedAtAction(nameof(HentVentende), new { id = forslag.Id }, forslag);
         }
 
-        // PUT api/endringsforslag/5/godkjenn
         [HttpPut("{id}/godkjenn")]
         public async Task<IActionResult> GodkjennForslag(int id, [FromQuery] int behandletAvId)
         {
@@ -48,6 +46,10 @@ namespace CareCard.API.Controllers
 
             if (forslag == null)
                 return NotFound();
+
+            var oppdatert = await ApplyGodkjentForslag(forslag);
+            if (!oppdatert)
+                return BadRequest("Fant ikke profil å oppdatere.");
 
             forslag.Status = "Godkjent";
             forslag.BehandletAvId = behandletAvId;
@@ -57,7 +59,6 @@ namespace CareCard.API.Controllers
             return NoContent();
         }
 
-        // PUT api/endringsforslag/5/avvis
         [HttpPut("{id}/avvis")]
         public async Task<IActionResult> AvvisForslag(int id, [FromQuery] int behandletAvId, [FromQuery] string kommentar)
         {
@@ -69,10 +70,60 @@ namespace CareCard.API.Controllers
             forslag.Status = "Avvist";
             forslag.BehandletAvId = behandletAvId;
             forslag.BehandletTidspunkt = DateTime.Now;
-            forslag.Kommentar = kommentar;
+            forslag.Kommentar = kommentar ?? string.Empty;
 
             await _context.SaveChangesAsync();
             return NoContent();
+        }
+
+        private async Task<bool> ApplyGodkjentForslag(EndringsForslag forslag)
+        {
+            if (forslag.ProfilType.Equals("Matprofil", StringComparison.OrdinalIgnoreCase))
+            {
+                var matprofil = await _context.Matprofiler
+                    .FirstOrDefaultAsync(m => m.PasientId == forslag.PasientId);
+
+                if (matprofil == null)
+                    return false;
+
+                if (!SetPropertyValue(matprofil, forslag.FeltNavn, forslag.NyVerdi))
+                    return false;
+
+                matprofil.SistEndret = DateTime.Now;
+                matprofil.SistEndretAvId = forslag.BehandletAvId ?? forslag.OpprettetAvId;
+                return true;
+            }
+
+            if (forslag.ProfilType.Equals("Stellprofil", StringComparison.OrdinalIgnoreCase))
+            {
+                var stellprofil = await _context.Stellprofiler
+                    .FirstOrDefaultAsync(s => s.PasientId == forslag.PasientId);
+
+                if (stellprofil == null)
+                    return false;
+
+                if (!SetPropertyValue(stellprofil, forslag.FeltNavn, forslag.NyVerdi))
+                    return false;
+
+                stellprofil.SistEndret = DateTime.Now;
+                stellprofil.SistEndretAvId = forslag.BehandletAvId ?? forslag.OpprettetAvId;
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool SetPropertyValue(object target, string feltNavn, string nyVerdi)
+        {
+            var property = target.GetType().GetProperty(
+                feltNavn,
+                BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+
+            if (property == null || !property.CanWrite || property.PropertyType != typeof(string))
+                return false;
+
+            property.SetValue(target, nyVerdi);
+            return true;
         }
     }
 }

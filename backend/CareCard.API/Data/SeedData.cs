@@ -12,6 +12,8 @@ namespace CareCard.API.Data
 
             SeedPasienter(context);
             SeedMatprofiler(context);
+            SeedStellprofiler(context);
+            OppdaterManglendeMatprofilFelt(context);
         }
 
         private static void SeedPasienter(CareCardDbContext context)
@@ -51,7 +53,10 @@ namespace CareCard.API.Data
                     Frokost = "Brødskive med brunost og syltetøy. Halvgrov skive, smør.",
                     Kvelds = "Lett kveldsmat – grøt eller en skive med ost.",
                     KonsistensMat = "Findelt",
+                    KonsistensDrikke = "Nivå 2 – sirupskonsistens. Gjelder all drikke inkludert vann.",
                     HvorSpiser = "Eget rom",
+                    Redskap = "Tykt håndtak på bestikk. Sklisikker matte under tallerken.",
+                    Misliker = "Fisk (særlig sild), kål, sterk mat, leverpostei.",
                     ErDiabetiker = false,
                     HarFortykningIDrikke = true,
                 },
@@ -118,6 +123,115 @@ namespace CareCard.API.Data
 
             context.Matprofiler.AddRange(nyeMatprofiler);
             context.SaveChanges();
+        }
+
+        private static void SeedStellprofiler(CareCardDbContext context)
+        {
+            var stellprofiler = new Dictionary<string, Stellprofil>
+            {
+                ["312"] = new()
+                {
+                    StellPreferanser = "Foretrekker morgenstell tidlig. Liker å ta det rolig.",
+                    Kommunikasjon = "Snakk rolig og tydelig. Gi god tid.",
+                    ViktigeHensyn = "Forsiktig ved forflytning. Svak venstre side.",
+                    Rutiner = "Hviler etter lunsj. Liker å sitte ute når været tillater det.",
+                },
+                ["308"] = new()
+                {
+                    StellPreferanser = "Foretrekker kveldsstell.",
+                    Kommunikasjon = "Kommuniserer godt verbalt.",
+                    ViktigeHensyn = "Ingen spesielle hensyn.",
+                    Rutiner = "Liker å se på TV om kvelden.",
+                },
+                ["305"] = new()
+                {
+                    StellPreferanser = "Liker å dusje annenhver dag.",
+                    Kommunikasjon = "Trenger tid til å svare, vær tålmodig.",
+                    ViktigeHensyn = "Diabetiker – sjekk huden nøye.",
+                    Rutiner = "Morgenstell etter frokost.",
+                },
+                ["314"] = new()
+                {
+                    StellPreferanser = "Klarer mye selv, gi assistanse ved behov.",
+                    Kommunikasjon = "Snakker tydelig, hører dårlig på venstre øre.",
+                    ViktigeHensyn = "Allergi mot lateks.",
+                    Rutiner = "Dusjed hver morgen.",
+                },
+            };
+
+            var pasienter = context.Pasienter
+                .Where(p => stellprofiler.Keys.Contains(p.Romnummer))
+                .ToList();
+
+            var pasienterMedStellprofil = context.Stellprofiler
+                .Select(s => s.PasientId)
+                .ToHashSet();
+
+            var nyeStellprofiler = new List<Stellprofil>();
+
+            foreach (var pasient in pasienter)
+            {
+                if (pasienterMedStellprofil.Contains(pasient.Id))
+                    continue;
+
+                var stellprofil = stellprofiler[pasient.Romnummer];
+                stellprofil.PasientId = pasient.Id;
+                nyeStellprofiler.Add(stellprofil);
+            }
+
+            if (nyeStellprofiler.Count == 0)
+                return;
+
+            context.Stellprofiler.AddRange(nyeStellprofiler);
+            context.SaveChanges();
+        }
+
+        private static void OppdaterManglendeMatprofilFelt(CareCardDbContext context)
+        {
+            var ekstraFelt = new Dictionary<string, (string KonsistensDrikke, string Redskap, string Misliker)>
+            {
+                ["312"] = (
+                    "Nivå 2 – sirupskonsistens. Gjelder all drikke inkludert vann.",
+                    "Tykt håndtak på bestikk. Sklisikker matte under tallerken.",
+                    "Fisk (særlig sild), kål, sterk mat, leverpostei."
+                ),
+            };
+
+            var pasienter = context.Pasienter
+                .Where(p => ekstraFelt.Keys.Contains(p.Romnummer))
+                .ToList();
+
+            var endret = false;
+
+            foreach (var pasient in pasienter)
+            {
+                var matprofil = context.Matprofiler.FirstOrDefault(m => m.PasientId == pasient.Id);
+                if (matprofil == null)
+                    continue;
+
+                var felt = ekstraFelt[pasient.Romnummer];
+
+                if (string.IsNullOrWhiteSpace(matprofil.KonsistensDrikke))
+                {
+                    matprofil.KonsistensDrikke = felt.KonsistensDrikke;
+                    endret = true;
+                }
+
+                if (string.IsNullOrWhiteSpace(matprofil.Redskap))
+                {
+                    matprofil.Redskap = felt.Redskap;
+                    endret = true;
+                }
+
+                if (string.IsNullOrWhiteSpace(matprofil.Misliker))
+                {
+                    matprofil.Misliker = felt.Misliker;
+                    endret = true;
+                }
+            }
+
+            if (endret)
+                context.SaveChanges();
         }
     }
 }

@@ -25,7 +25,7 @@ function Avdelingsvalg() {
 
   return (
     <>
-      <Navbar antallVentende={2} />
+      <Navbar />
       <div style={styles.page}>
         <link
           href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap"

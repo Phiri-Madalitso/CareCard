@@ -1,66 +1,108 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IconChevronLeft, IconCheck, IconX } from '@tabler/icons-react';
 import Navbar from '../components/Navbar';
 import { useSpråk } from '../hooks/useSprak';
+import {
+  hentVentendeForslag,
+  godkjennForslag,
+  avvisForslag,
+} from '../services/profilService';
 
-const HARDKODEDE_FORSLAG = [
-  {
-    id: 1,
-    pasient: 'Astrid Henriksen',
-    kategori: 'Matprofil',
-    felt: 'Frokost',
-    gammelVerdi: 'Brødskive med brunost og syltetøy.',
-    nyVerdi: 'Havregrøt med kanel og honning.',
-    sendtAv: 'Per Hansen',
-    dato: '01.06.2026 kl. 08:14',
-  },
-  {
-    id: 2,
-    pasient: 'Kåre Solberg',
-    kategori: 'Matprofil',
-    felt: 'Drikke',
-    gammelVerdi: 'Juice og kefir.',
-    nyVerdi: 'Kun vann og juice. Tåler ikke melkeprodukter lenger.',
-    sendtAv: 'Lise Berg',
-    dato: '01.06.2026 kl. 09:32',
-  },
-  {
-    id: 3,
-    pasient: 'Inger Lise Dahl',
-    kategori: 'Stellprofil',
-    felt: 'Rutiner',
-    gammelVerdi: 'Hviler etter lunsj.',
-    nyVerdi: 'Hviler etter lunsj og etter middag.',
-    sendtAv: 'Madalitso Skjelnes',
-    dato: '01.06.2026 kl. 11:45',
-  },
-];
+function formatDato(dato) {
+  if (!dato) return '';
+  return new Date(dato).toLocaleString('nb-NO', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function mapForslagTilVisning(apiForslag) {
+  const pasient = apiForslag.pasient;
+  const pasientNavn = pasient
+    ? `${pasient.fornavn} ${pasient.etternavn}`
+    : `Pasient ${apiForslag.pasientId}`;
+
+  return {
+    id: apiForslag.id,
+    pasient: pasientNavn,
+    kategori: apiForslag.profilType,
+    felt: apiForslag.feltNavn,
+    gammelVerdi: apiForslag.gammelVerdi,
+    nyVerdi: apiForslag.nyVerdi,
+    sendtAv: `Ansatt #${apiForslag.opprettetAvId}`,
+    dato: formatDato(apiForslag.opprettetTidspunkt),
+  };
+}
 
 function Godkjenning() {
   const navigate = useNavigate();
   const { t } = useSpråk();
-  const [forslag, setForslag] = useState(HARDKODEDE_FORSLAG);
+  const [forslag, setForslag] = useState([]);
+  const [laster, setLaster] = useState(true);
+  const [feil, setFeil] = useState('');
   const [kommentar, setKommentar] = useState({});
   const [visKommentar, setVisKommentar] = useState(null);
   const [visToast, setVisToast] = useState('');
+  const [behandler, setBehandler] = useState(null);
 
-  const godkjenn = (id) => {
-    setForslag((prev) => prev.filter((f) => f.id !== id));
-    setVisToast('endringGodkjent');
-    setTimeout(() => setVisToast(''), 3000);
+  const lastForslag = useCallback(async () => {
+    setLaster(true);
+    setFeil('');
+
+    try {
+      const data = await hentVentendeForslag();
+      setForslag(data.map(mapForslagTilVisning));
+    } catch {
+      setFeil(t.kunneIkkeHenteForslag);
+    } finally {
+      setLaster(false);
+    }
+  }, [t.kunneIkkeHenteForslag]);
+
+  useEffect(() => {
+    lastForslag();
+  }, [lastForslag]);
+
+  const godkjenn = async (id) => {
+    setBehandler(id);
+    setFeil('');
+
+    try {
+      await godkjennForslag(id);
+      setForslag((prev) => prev.filter((f) => f.id !== id));
+      setVisToast('endringGodkjent');
+      setTimeout(() => setVisToast(''), 3000);
+    } catch {
+      setFeil(t.kunneIkkeGodkjenne);
+    } finally {
+      setBehandler(null);
+    }
   };
 
-  const avvis = (id) => {
-    setForslag((prev) => prev.filter((f) => f.id !== id));
-    setVisKommentar(null);
-    setVisToast('forslagAvvist');
-    setTimeout(() => setVisToast(''), 3000);
+  const avvis = async (id) => {
+    setBehandler(id);
+    setFeil('');
+
+    try {
+      await avvisForslag(id, kommentar[id] || '');
+      setForslag((prev) => prev.filter((f) => f.id !== id));
+      setVisKommentar(null);
+      setVisToast('forslagAvvist');
+      setTimeout(() => setVisToast(''), 3000);
+    } catch {
+      setFeil(t.kunneIkkeAvvise);
+    } finally {
+      setBehandler(null);
+    }
   };
 
   return (
     <div style={styles.container}>
-      <Navbar antallVentende={forslag.length} />
+      <Navbar />
 
       <div style={styles.innhold}>
         <div style={styles.topBar}>
@@ -74,17 +116,22 @@ function Godkjenning() {
           <div style={{ width: 22 }} />
         </div>
 
-        <p style={styles.undertittel}>
-          {forslag.length} {t.eldsteForst}
-        </p>
+        {feil && <p style={styles.feil}>{feil}</p>}
+        {laster && <p style={styles.laster}>{t.laster}</p>}
 
-        {forslag.length === 0 && (
+        {!laster && (
+          <p style={styles.undertittel}>
+            {forslag.length} {t.eldsteForst}
+          </p>
+        )}
+
+        {!laster && forslag.length === 0 && (
           <div style={styles.tom}>
             <p>{t.ingenForslag}</p>
           </div>
         )}
 
-        {forslag.map((f) => (
+        {!laster && forslag.map((f) => (
           <div key={f.id} style={styles.kort}>
             <div style={styles.kortHeader}>
               <div>
@@ -122,6 +169,7 @@ function Godkjenning() {
               <button
                 type="button"
                 style={styles.avvisKnapp}
+                disabled={behandler === f.id}
                 onClick={() => (visKommentar === f.id ? avvis(f.id) : setVisKommentar(f.id))}
               >
                 <IconX size={14} /> {visKommentar === f.id ? t.sendAvvisning : t.avvis}
@@ -129,6 +177,7 @@ function Godkjenning() {
               <button
                 type="button"
                 style={styles.godkjennKnapp}
+                disabled={behandler === f.id}
                 onClick={() => godkjenn(f.id)}
               >
                 <IconCheck size={14} /> {t.godkjenn}
@@ -174,6 +223,16 @@ const styles = {
     fontSize: '13px',
     color: '#6B7280',
     margin: '0 0 16px',
+  },
+  feil: {
+    color: '#A32D2D',
+    fontSize: '14px',
+    marginBottom: '12px',
+  },
+  laster: {
+    color: '#6B7280',
+    fontSize: '14px',
+    marginBottom: '12px',
   },
   tom: {
     textAlign: 'center',

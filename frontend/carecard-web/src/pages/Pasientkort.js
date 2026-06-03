@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   IconChevronLeft,
@@ -12,29 +12,43 @@ import {
 } from '@tabler/icons-react';
 import Navbar from '../components/Navbar';
 import { useSpråk } from '../hooks/useSprak';
+import {
+  hentMatprofil,
+  hentStellprofil,
+  sendEndringsforslag,
+} from '../services/profilService';
 
-const ASTRID_DATA = {
-  allergier: ['Nøtter (alle typer)', 'Skalldyr'],
-  fortykningsbehov: 'Nivå 2 – sirupskonsistens. Gjelder all drikke inkludert vann.',
-  kaffeTe: 'Kaffe med fløte og 1 ts sukker. Aldri svart.',
-  drikke: 'Helst saft. Liker eplejuice til middag. Ikke melk alene.',
-  frokost: 'Brødskive med brunost og syltetøy. Halvgrov skive, smør. Yoghurt naturell.',
-  kveldsmat: 'Lett kveldsmat – grøt eller en skive med ost. Liker havregrøt med kanel.',
-  konsistensMat: 'Findelt mat. Kjøtt kvernes.',
-  hvorSpiser: 'Spiser på rommet. Foretrekker rolig miljø.',
-  redskap: 'Tykt håndtak på bestikk. Sklisikker matte under tallerken.',
-  likerIkke: 'Fisk (særlig sild), kål, sterk mat, leverpostei.',
-  stellpreferanser: 'Foretrekker morgenstell tidlig. Liker å ta det rolig.',
-  kommunikasjonsbehov: 'Snakk rolig og tydelig. Gi god tid.',
-  viktigeHensyn: 'Forsiktig ved forflytning. Svak venstre side.',
-  rutiner: 'Hviler etter lunsj. Liker å sitte ute når været tillater det.',
-  sistEndret: '14. mai 2026, kl. 09:42 av Marit Olsen',
+const FELT_KONFIG = {
+  fortykningsbehov: { profilType: 'Matprofil', apiFelt: 'KonsistensDrikke', kilde: 'mat', felt: 'konsistensDrikke' },
+  kaffeTe: { profilType: 'Matprofil', apiFelt: 'KaffeTe', kilde: 'mat', felt: 'kaffeTe' },
+  drikke: { profilType: 'Matprofil', apiFelt: 'Drikke', kilde: 'mat', felt: 'drikke' },
+  frokost: { profilType: 'Matprofil', apiFelt: 'Frokost', kilde: 'mat', felt: 'frokost' },
+  kveldsmat: { profilType: 'Matprofil', apiFelt: 'Kvelds', kilde: 'mat', felt: 'kvelds' },
+  konsistensMat: { profilType: 'Matprofil', apiFelt: 'KonsistensMat', kilde: 'mat', felt: 'konsistensMat' },
+  hvorSpiser: { profilType: 'Matprofil', apiFelt: 'HvorSpiser', kilde: 'mat', felt: 'hvorSpiser' },
+  redskap: { profilType: 'Matprofil', apiFelt: 'Redskap', kilde: 'mat', felt: 'redskap' },
+  likerIkke: { profilType: 'Matprofil', apiFelt: 'Misliker', kilde: 'mat', felt: 'misliker' },
+  stellpreferanser: { profilType: 'Stellprofil', apiFelt: 'StellPreferanser', kilde: 'stell', felt: 'stellPreferanser' },
+  kommunikasjonsbehov: { profilType: 'Stellprofil', apiFelt: 'Kommunikasjon', kilde: 'stell', felt: 'kommunikasjon' },
+  viktigeHensyn: { profilType: 'Stellprofil', apiFelt: 'ViktigeHensyn', kilde: 'stell', felt: 'viktigeHensyn' },
+  rutiner: { profilType: 'Stellprofil', apiFelt: 'Rutiner', kilde: 'stell', felt: 'rutiner' },
 };
 
 function getInitials(fornavn, etternavn) {
   const f = fornavn.trim().split(' ')[0][0] || '';
   const e = etternavn.trim()[0] || '';
   return (f + e).toUpperCase();
+}
+
+function formatSistEndret(dato) {
+  if (!dato) return '–';
+  return new Date(dato).toLocaleString('nb-NO', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 function SectionBox({ title, children, variant = 'default', icon }) {
@@ -58,85 +72,184 @@ function SectionBox({ title, children, variant = 'default', icon }) {
   );
 }
 
+function RedigerbartFelt({
+  feltNavn,
+  label,
+  ikon,
+  verdi,
+  erAktiv,
+  nyVerdi,
+  sender,
+  t,
+  onStartRediger,
+  onAvbryt,
+  onNyVerdiChange,
+  onSend,
+}) {
+  return (
+    <div style={styles.kort}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+        <p style={styles.kortLabel}>{ikon} {label}</p>
+        <IconPencil
+          size={14}
+          color="#6B7280"
+          style={{ cursor: sender ? 'not-allowed' : 'pointer', flexShrink: 0, opacity: sender ? 0.4 : 1 }}
+          onClick={() => !sender && onStartRediger(feltNavn, verdi)}
+        />
+      </div>
+
+      {!erAktiv && <p style={styles.kortText}>{verdi || '–'}</p>}
+
+      {erAktiv && (
+        <div>
+          <textarea
+            style={styles.tekstfelt}
+            value={nyVerdi}
+            onChange={(e) => onNyVerdiChange(e.target.value)}
+            rows={3}
+            disabled={sender}
+          />
+          <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+            <button type="button" style={styles.avbrytKnapp} onClick={onAvbryt} disabled={sender}>
+              {t.avbryt}
+            </button>
+            <button type="button" style={styles.sendKnapp} onClick={() => onSend(feltNavn)} disabled={sender}>
+              {sender ? t.sender : t.sendForslag}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Pasientkort() {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useSpråk();
-  const pasient = location.state?.pasient || {
-    id: 1,
-    fornavn: 'Astrid',
-    etternavn: 'Henriksen',
-    rom: '312',
-    allergi: true,
-    dia: false,
-    fortykning: true,
-  };
+  const pasient = location.state?.pasient;
 
   const [activeTab, setActiveTab] = useState('matprofil');
+  const [matprofil, setMatprofil] = useState(null);
+  const [stellprofil, setStellprofil] = useState(null);
+  const [laster, setLaster] = useState(true);
+  const [feil, setFeil] = useState('');
   const [aktivtFelt, setAktivtFelt] = useState(null);
   const [nyVerdi, setNyVerdi] = useState('');
+  const [sender, setSender] = useState(false);
   const [visToast, setVisToast] = useState(false);
-  const data = ASTRID_DATA;
 
-  const RedigerbartFelt = ({ feltNavn, label, ikon, verdi, toKolonner }) => {
-    const erAktiv = aktivtFelt === feltNavn;
+  useEffect(() => {
+    if (!pasient?.id) {
+      setLaster(false);
+      setFeil('Ingen pasient valgt.');
+      return undefined;
+    }
 
-    return (
-      <div style={{ ...styles.kort, ...(toKolonner ? {} : {}) }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-          <p style={styles.kortLabel}>{ikon} {label}</p>
-          <IconPencil
-            size={14}
-            color="#6B7280"
-            style={{ cursor: 'pointer', flexShrink: 0 }}
-            onClick={() => {
-              setAktivtFelt(erAktiv ? null : feltNavn);
-              setNyVerdi(verdi);
-            }}
-          />
-        </div>
+    let avbrutt = false;
 
-        {!erAktiv && (
-          <p style={styles.kortText}>{verdi}</p>
-        )}
+    async function lastProfiler() {
+      setLaster(true);
+      setFeil('');
 
-        {erAktiv && (
-          <div>
-            <textarea
-              style={styles.tekstfelt}
-              value={nyVerdi}
-              onChange={(e) => setNyVerdi(e.target.value)}
-              rows={3}
-            />
-            <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-              <button
-                type="button"
-                style={styles.avbrytKnapp}
-                onClick={() => setAktivtFelt(null)}
-              >
-                {t.avbryt}
-              </button>
-              <button
-                type="button"
-                style={styles.sendKnapp}
-                onClick={() => {
-                  setVisToast(true);
-                  setAktivtFelt(null);
-                  setTimeout(() => setVisToast(false), 3000);
-                }}
-              >
-                {t.sendForslag}
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    );
+      try {
+        const [mat, stell] = await Promise.all([
+          hentMatprofil(pasient.id),
+          hentStellprofil(pasient.id),
+        ]);
+        if (!avbrutt) {
+          setMatprofil(mat);
+          setStellprofil(stell);
+          if (!mat && !stell) {
+            setFeil(t.ingenProfilData);
+          }
+        }
+      } catch {
+        if (!avbrutt) {
+          setFeil(t.kunneIkkeHenteProfil);
+        }
+      } finally {
+        if (!avbrutt) {
+          setLaster(false);
+        }
+      }
+    }
+
+    lastProfiler();
+
+    return () => {
+      avbrutt = true;
+    };
+  }, [pasient?.id, t.kunneIkkeHenteProfil, t.ingenProfilData]);
+
+  const hentVerdi = useCallback(
+    (feltNavn) => {
+      const cfg = FELT_KONFIG[feltNavn];
+      if (!cfg) return '';
+      const profil = cfg.kilde === 'mat' ? matprofil : stellprofil;
+      return profil?.[cfg.felt] ?? '';
+    },
+    [matprofil, stellprofil]
+  );
+
+  const sistEndretTekst = formatSistEndret(
+    activeTab === 'matprofil' ? matprofil?.sistEndret : stellprofil?.sistEndret
+  );
+
+  const allergierListe = (matprofil?.allergier || '')
+    .split(',')
+    .map((a) => a.trim())
+    .filter(Boolean);
+
+  const sendForslag = async (feltNavn) => {
+    const cfg = FELT_KONFIG[feltNavn];
+    const gammel = hentVerdi(feltNavn);
+    const ny = nyVerdi.trim();
+
+    if (!ny || ny === gammel.trim()) {
+      setAktivtFelt(null);
+      return;
+    }
+
+    setSender(true);
+    setFeil('');
+
+    try {
+      await sendEndringsforslag({
+        pasientId: pasient.id,
+        profilType: cfg.profilType,
+        feltNavn: cfg.apiFelt,
+        gammelVerdi: gammel,
+        nyVerdi: ny,
+        opprettetAvId: 1,
+      });
+      setVisToast(true);
+      setAktivtFelt(null);
+      setTimeout(() => setVisToast(false), 3000);
+    } catch {
+      setFeil(t.kunneIkkeSendeForslag);
+    } finally {
+      setSender(false);
+    }
   };
+
+  if (!pasient) {
+    return (
+      <>
+        <Navbar />
+        <div style={styles.page}>
+          <p style={styles.feilTekst}>{t.ingenPasientValgt}</p>
+          <button type="button" style={styles.suggestButton} onClick={() => navigate(-1)}>
+            {t.tilbake}
+          </button>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
-      <Navbar antallVentende={2} />
+      <Navbar />
       <div style={styles.page}>
         <link
           href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap"
@@ -144,191 +257,298 @@ function Pasientkort() {
         />
 
         <div style={styles.topbar}>
-        <button style={styles.iconButton} onClick={() => navigate(-1)}>
-          <IconChevronLeft size={22} color="#13171F" />
-        </button>
-        <span style={styles.topbarTitle}>{t.pasientkort}</span>
-        <button style={styles.iconButton}>
-          <IconPencil size={20} color="#13171F" />
-        </button>
-      </div>
-
-      <div style={styles.profileHeader}>
-        <div style={styles.avatar}>
-          {getInitials(pasient.fornavn, pasient.etternavn)}
+          <button style={styles.iconButton} onClick={() => navigate(-1)}>
+            <IconChevronLeft size={22} color="#13171F" />
+          </button>
+          <span style={styles.topbarTitle}>{t.pasientkort}</span>
+          <div style={{ width: 22 }} />
         </div>
-        <div>
-          <h1 style={styles.patientName}>
-            {pasient.fornavn} {pasient.etternavn}
-          </h1>
-          <p style={styles.patientMeta}>
-            {t.rom} {pasient.rom} · {t.langtidsplass}
-          </p>
-        </div>
-      </div>
 
-      <div style={styles.alertBadges}>
-        {pasient.allergi && (
-          <span style={styles.allergiBadge}>
-            <IconAlertTriangle size={14} />
-            {t.allergi}
-          </span>
+        <div style={styles.profileHeader}>
+          <div style={styles.avatar}>
+            {getInitials(pasient.fornavn, pasient.etternavn)}
+          </div>
+          <div>
+            <h1 style={styles.patientName}>
+              {pasient.fornavn} {pasient.etternavn}
+            </h1>
+            <p style={styles.patientMeta}>
+              {t.rom} {pasient.rom} · {t.langtidsplass}
+            </p>
+          </div>
+        </div>
+
+        <div style={styles.alertBadges}>
+          {pasient.allergi && (
+            <span style={styles.allergiBadge}>
+              <IconAlertTriangle size={14} />
+              {t.allergi}
+            </span>
+          )}
+          {pasient.fortykning && (
+            <span style={styles.warningBadge}>
+              <IconGlass size={14} />
+              {t.fortykning}
+            </span>
+          )}
+          {pasient.dia && (
+            <span style={styles.warningBadge}>{t.dia}</span>
+          )}
+        </div>
+
+        {feil && <p style={styles.feilTekst}>{feil}</p>}
+        {laster && <p style={styles.lasterTekst}>{t.laster}</p>}
+
+        {!laster && (
+          <>
+            <div style={styles.tabContainer}>
+              <button
+                type="button"
+                style={{ ...styles.tab, ...(activeTab === 'matprofil' ? styles.tabActive : {}) }}
+                onClick={() => setActiveTab('matprofil')}
+              >
+                {t.matprofil}
+              </button>
+              <button
+                type="button"
+                style={{ ...styles.tab, ...(activeTab === 'stellprofil' ? styles.tabActive : {}) }}
+                onClick={() => setActiveTab('stellprofil')}
+              >
+                {t.stellprofil}
+              </button>
+            </div>
+
+            {activeTab === 'matprofil' && matprofil && (
+              <div style={styles.tabContent}>
+                {allergierListe.length > 0 && (
+                  <SectionBox title={t.allergier} variant="red">
+                    <ul style={styles.bulletList}>
+                      {allergierListe.map((a) => (
+                        <li key={a}>{a}</li>
+                      ))}
+                    </ul>
+                  </SectionBox>
+                )}
+
+                <RedigerbartFelt
+                  feltNavn="fortykningsbehov"
+                  label={t.fortykningsbehov}
+                  ikon={null}
+                  verdi={hentVerdi('fortykningsbehov')}
+                  erAktiv={aktivtFelt === 'fortykningsbehov'}
+                  nyVerdi={nyVerdi}
+                  sender={sender}
+                  t={t}
+                  onStartRediger={(felt, verdi) => { setAktivtFelt(felt); setNyVerdi(verdi); }}
+                  onAvbryt={() => setAktivtFelt(null)}
+                  onNyVerdiChange={setNyVerdi}
+                  onSend={sendForslag}
+                />
+
+                <div style={styles.grid}>
+                  <RedigerbartFelt
+                    feltNavn="kaffeTe"
+                    label={t.kaffeTe}
+                    ikon={null}
+                    verdi={hentVerdi('kaffeTe')}
+                    erAktiv={aktivtFelt === 'kaffeTe'}
+                    nyVerdi={nyVerdi}
+                    sender={sender}
+                    t={t}
+                    onStartRediger={(felt, verdi) => { setAktivtFelt(felt); setNyVerdi(verdi); }}
+                    onAvbryt={() => setAktivtFelt(null)}
+                    onNyVerdiChange={setNyVerdi}
+                    onSend={sendForslag}
+                  />
+                  <RedigerbartFelt
+                    feltNavn="drikke"
+                    label={t.drikke}
+                    ikon={null}
+                    verdi={hentVerdi('drikke')}
+                    erAktiv={aktivtFelt === 'drikke'}
+                    nyVerdi={nyVerdi}
+                    sender={sender}
+                    t={t}
+                    onStartRediger={(felt, verdi) => { setAktivtFelt(felt); setNyVerdi(verdi); }}
+                    onAvbryt={() => setAktivtFelt(null)}
+                    onNyVerdiChange={setNyVerdi}
+                    onSend={sendForslag}
+                  />
+                </div>
+
+                <RedigerbartFelt
+                  feltNavn="frokost"
+                  label={t.frokost}
+                  ikon={null}
+                  verdi={hentVerdi('frokost')}
+                  erAktiv={aktivtFelt === 'frokost'}
+                  nyVerdi={nyVerdi}
+                  sender={sender}
+                  t={t}
+                  onStartRediger={(felt, verdi) => { setAktivtFelt(felt); setNyVerdi(verdi); }}
+                  onAvbryt={() => setAktivtFelt(null)}
+                  onNyVerdiChange={setNyVerdi}
+                  onSend={sendForslag}
+                />
+
+                <RedigerbartFelt
+                  feltNavn="kveldsmat"
+                  label={t.kveldsmat}
+                  ikon={<IconMoon size={14} color="#6B7280" />}
+                  verdi={hentVerdi('kveldsmat')}
+                  erAktiv={aktivtFelt === 'kveldsmat'}
+                  nyVerdi={nyVerdi}
+                  sender={sender}
+                  t={t}
+                  onStartRediger={(felt, verdi) => { setAktivtFelt(felt); setNyVerdi(verdi); }}
+                  onAvbryt={() => setAktivtFelt(null)}
+                  onNyVerdiChange={setNyVerdi}
+                  onSend={sendForslag}
+                />
+
+                <div style={styles.grid}>
+                  <RedigerbartFelt
+                    feltNavn="konsistensMat"
+                    label={t.konsistensMat}
+                    ikon={null}
+                    verdi={hentVerdi('konsistensMat')}
+                    erAktiv={aktivtFelt === 'konsistensMat'}
+                    nyVerdi={nyVerdi}
+                    sender={sender}
+                    t={t}
+                    onStartRediger={(felt, verdi) => { setAktivtFelt(felt); setNyVerdi(verdi); }}
+                    onAvbryt={() => setAktivtFelt(null)}
+                    onNyVerdiChange={setNyVerdi}
+                    onSend={sendForslag}
+                  />
+                  <RedigerbartFelt
+                    feltNavn="hvorSpiser"
+                    label={t.hvorSpiser}
+                    ikon={null}
+                    verdi={hentVerdi('hvorSpiser')}
+                    erAktiv={aktivtFelt === 'hvorSpiser'}
+                    nyVerdi={nyVerdi}
+                    sender={sender}
+                    t={t}
+                    onStartRediger={(felt, verdi) => { setAktivtFelt(felt); setNyVerdi(verdi); }}
+                    onAvbryt={() => setAktivtFelt(null)}
+                    onNyVerdiChange={setNyVerdi}
+                    onSend={sendForslag}
+                  />
+                </div>
+
+                <RedigerbartFelt
+                  feltNavn="redskap"
+                  label={t.redskap}
+                  ikon={<IconToolsKitchen2 size={14} color="#6B7280" />}
+                  verdi={hentVerdi('redskap')}
+                  erAktiv={aktivtFelt === 'redskap'}
+                  nyVerdi={nyVerdi}
+                  sender={sender}
+                  t={t}
+                  onStartRediger={(felt, verdi) => { setAktivtFelt(felt); setNyVerdi(verdi); }}
+                  onAvbryt={() => setAktivtFelt(null)}
+                  onNyVerdiChange={setNyVerdi}
+                  onSend={sendForslag}
+                />
+
+                <RedigerbartFelt
+                  feltNavn="likerIkke"
+                  label={t.likerIkke}
+                  ikon={<IconX size={14} color="#6B7280" />}
+                  verdi={hentVerdi('likerIkke')}
+                  erAktiv={aktivtFelt === 'likerIkke'}
+                  nyVerdi={nyVerdi}
+                  sender={sender}
+                  t={t}
+                  onStartRediger={(felt, verdi) => { setAktivtFelt(felt); setNyVerdi(verdi); }}
+                  onAvbryt={() => setAktivtFelt(null)}
+                  onNyVerdiChange={setNyVerdi}
+                  onSend={sendForslag}
+                />
+
+                <div style={styles.lastChanged}>
+                  <IconClock size={14} color="#6B7280" />
+                  <span>{t.sistEndret}: {sistEndretTekst}</span>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'matprofil' && !matprofil && !laster && (
+              <p style={styles.feilTekst}>{t.manglerMatprofil}</p>
+            )}
+
+            {activeTab === 'stellprofil' && stellprofil && (
+              <div style={styles.tabContent}>
+                <RedigerbartFelt
+                  feltNavn="stellpreferanser"
+                  label={t.stellpreferanser}
+                  ikon={null}
+                  verdi={hentVerdi('stellpreferanser')}
+                  erAktiv={aktivtFelt === 'stellpreferanser'}
+                  nyVerdi={nyVerdi}
+                  sender={sender}
+                  t={t}
+                  onStartRediger={(felt, verdi) => { setAktivtFelt(felt); setNyVerdi(verdi); }}
+                  onAvbryt={() => setAktivtFelt(null)}
+                  onNyVerdiChange={setNyVerdi}
+                  onSend={sendForslag}
+                />
+                <RedigerbartFelt
+                  feltNavn="kommunikasjonsbehov"
+                  label={t.kommunikasjonsbehov}
+                  ikon={null}
+                  verdi={hentVerdi('kommunikasjonsbehov')}
+                  erAktiv={aktivtFelt === 'kommunikasjonsbehov'}
+                  nyVerdi={nyVerdi}
+                  sender={sender}
+                  t={t}
+                  onStartRediger={(felt, verdi) => { setAktivtFelt(felt); setNyVerdi(verdi); }}
+                  onAvbryt={() => setAktivtFelt(null)}
+                  onNyVerdiChange={setNyVerdi}
+                  onSend={sendForslag}
+                />
+                <RedigerbartFelt
+                  feltNavn="viktigeHensyn"
+                  label={t.viktigeHensyn}
+                  ikon={null}
+                  verdi={hentVerdi('viktigeHensyn')}
+                  erAktiv={aktivtFelt === 'viktigeHensyn'}
+                  nyVerdi={nyVerdi}
+                  sender={sender}
+                  t={t}
+                  onStartRediger={(felt, verdi) => { setAktivtFelt(felt); setNyVerdi(verdi); }}
+                  onAvbryt={() => setAktivtFelt(null)}
+                  onNyVerdiChange={setNyVerdi}
+                  onSend={sendForslag}
+                />
+                <RedigerbartFelt
+                  feltNavn="rutiner"
+                  label={t.rutiner}
+                  ikon={null}
+                  verdi={hentVerdi('rutiner')}
+                  erAktiv={aktivtFelt === 'rutiner'}
+                  nyVerdi={nyVerdi}
+                  sender={sender}
+                  t={t}
+                  onStartRediger={(felt, verdi) => { setAktivtFelt(felt); setNyVerdi(verdi); }}
+                  onAvbryt={() => setAktivtFelt(null)}
+                  onNyVerdiChange={setNyVerdi}
+                  onSend={sendForslag}
+                />
+
+                <div style={styles.lastChanged}>
+                  <IconClock size={14} color="#6B7280" />
+                  <span>{t.sistEndret}: {sistEndretTekst}</span>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'stellprofil' && !stellprofil && !laster && (
+              <p style={styles.feilTekst}>{t.manglerStellprofil}</p>
+            )}
+          </>
         )}
-        {pasient.fortykning && (
-          <span style={styles.warningBadge}>
-            <IconGlass size={14} />
-            {t.fortykning}
-          </span>
-        )}
-        {pasient.dia && (
-          <span style={styles.warningBadge}>{t.dia}</span>
-        )}
-      </div>
-
-      <div style={styles.tabContainer}>
-        <button
-          style={{
-            ...styles.tab,
-            ...(activeTab === 'matprofil' ? styles.tabActive : {}),
-          }}
-          onClick={() => setActiveTab('matprofil')}
-        >
-          {t.matprofil}
-        </button>
-        <button
-          style={{
-            ...styles.tab,
-            ...(activeTab === 'stellprofil' ? styles.tabActive : {}),
-          }}
-          onClick={() => setActiveTab('stellprofil')}
-        >
-          {t.stellprofil}
-        </button>
-      </div>
-
-      {activeTab === 'matprofil' && (
-        <div style={styles.tabContent}>
-          <SectionBox title={t.allergier} variant="red">
-            <ul style={styles.bulletList}>
-              {data.allergier.map((a) => (
-                <li key={a}>{a}</li>
-              ))}
-            </ul>
-          </SectionBox>
-
-          <RedigerbartFelt
-            feltNavn="fortykningsbehov"
-            label={t.fortykningsbehov}
-            ikon={null}
-            verdi={data.fortykningsbehov}
-          />
-
-          <div style={styles.grid}>
-            <RedigerbartFelt
-              feltNavn="kaffeTe"
-              label={t.kaffeTe}
-              ikon={null}
-              verdi={data.kaffeTe}
-              toKolonner
-            />
-            <RedigerbartFelt
-              feltNavn="drikke"
-              label={t.drikke}
-              ikon={null}
-              verdi={data.drikke}
-              toKolonner
-            />
-          </div>
-
-          <RedigerbartFelt
-            feltNavn="frokost"
-            label={t.frokost}
-            ikon={null}
-            verdi={data.frokost}
-          />
-
-          <RedigerbartFelt
-            feltNavn="kveldsmat"
-            label={t.kveldsmat}
-            ikon={<IconMoon size={14} color="#6B7280" />}
-            verdi={data.kveldsmat}
-          />
-
-          <div style={styles.grid}>
-            <RedigerbartFelt
-              feltNavn="konsistensMat"
-              label={t.konsistensMat}
-              ikon={null}
-              verdi={data.konsistensMat}
-              toKolonner
-            />
-            <RedigerbartFelt
-              feltNavn="hvorSpiser"
-              label={t.hvorSpiser}
-              ikon={null}
-              verdi={data.hvorSpiser}
-              toKolonner
-            />
-          </div>
-
-          <RedigerbartFelt
-            feltNavn="redskap"
-            label={t.redskap}
-            ikon={<IconToolsKitchen2 size={14} color="#6B7280" />}
-            verdi={data.redskap}
-          />
-
-          <RedigerbartFelt
-            feltNavn="likerIkke"
-            label={t.likerIkke}
-            ikon={<IconX size={14} color="#6B7280" />}
-            verdi={data.likerIkke}
-          />
-
-          <div style={styles.lastChanged}>
-            <IconClock size={14} color="#6B7280" />
-            <span>{t.sistEndret}: {data.sistEndret}</span>
-          </div>
-
-          <button type="button" style={styles.suggestButton}>{t.foreslåEndring}</button>
-        </div>
-      )}
-
-      {activeTab === 'stellprofil' && (
-        <div style={styles.tabContent}>
-          <RedigerbartFelt
-            feltNavn="stellpreferanser"
-            label={t.stellpreferanser}
-            ikon={null}
-            verdi={data.stellpreferanser}
-          />
-          <RedigerbartFelt
-            feltNavn="kommunikasjonsbehov"
-            label={t.kommunikasjonsbehov}
-            ikon={null}
-            verdi={data.kommunikasjonsbehov}
-          />
-          <RedigerbartFelt
-            feltNavn="viktigeHensyn"
-            label={t.viktigeHensyn}
-            ikon={null}
-            verdi={data.viktigeHensyn}
-          />
-          <RedigerbartFelt
-            feltNavn="rutiner"
-            label={t.rutiner}
-            ikon={null}
-            verdi={data.rutiner}
-          />
-
-          <div style={styles.lastChanged}>
-            <IconClock size={14} color="#6B7280" />
-            <span>{t.sistEndret}: {data.sistEndret}</span>
-          </div>
-
-          <button type="button" style={styles.suggestButton}>{t.foreslåEndring}</button>
-        </div>
-      )}
 
         {visToast && (
           <div style={styles.toast}>
@@ -478,12 +698,6 @@ const styles = {
     lineHeight: 1.6,
     color: '#A32D2D',
   },
-  boxText: {
-    margin: 0,
-    fontSize: 14,
-    lineHeight: 1.5,
-    color: '#13171F',
-  },
   grid: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
@@ -578,6 +792,16 @@ const styles = {
     fontWeight: '500',
     zIndex: 1000,
     boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+  },
+  feilTekst: {
+    color: '#A32D2D',
+    fontSize: 14,
+    marginBottom: 12,
+  },
+  lasterTekst: {
+    color: '#6B7280',
+    fontSize: 14,
+    marginBottom: 12,
   },
 };
 

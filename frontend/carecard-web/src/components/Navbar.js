@@ -1,13 +1,43 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IconBell } from '@tabler/icons-react';
 import CareCardLogo from './CareCardLogo';
 import { useSpråk } from '../hooks/useSprak';
+import { hentVentendeForslag } from '../services/profilService';
 
-function Navbar({ antallVentende = 0 }) {
+function Navbar() {
   const navigate = useNavigate();
   const { t } = useSpråk();
   const rolle = localStorage.getItem('rolle');
   const skalViseVarsler = rolle === 'sykepleier' || rolle === 'leder';
+  const [antallVentende, setAntallVentende] = useState(0);
+
+  useEffect(() => {
+    if (!skalViseVarsler) return undefined;
+
+    let avbrutt = false;
+
+    async function oppdaterAntall() {
+      try {
+        const forslag = await hentVentendeForslag();
+        if (!avbrutt) {
+          setAntallVentende(forslag.length);
+        }
+      } catch {
+        if (!avbrutt) {
+          setAntallVentende(0);
+        }
+      }
+    }
+
+    oppdaterAntall();
+    const intervall = setInterval(oppdaterAntall, 30000);
+
+    return () => {
+      avbrutt = true;
+      clearInterval(intervall);
+    };
+  }, [skalViseVarsler]);
 
   return (
     <div style={styles.navbar}>
