@@ -14,6 +14,7 @@ namespace CareCard.API.Data
             SeedMatprofiler(context);
             SeedStellprofiler(context);
             OppdaterManglendeMatprofilFelt(context);
+            KorrigerFeilLagretProfiltekst(context);
             SeedAnsatte(context);
         }
 
@@ -272,6 +273,56 @@ namespace CareCard.API.Data
                 });
 
             context.SaveChanges();
+        }
+
+        /// <summary>
+        /// Retter profilfelt som feilaktig ble lagret på fremmedspråk før godkjenn-fiksen.
+        /// </summary>
+        private static void KorrigerFeilLagretProfiltekst(CareCardDbContext context)
+        {
+            var korrektKaffeTe = new Dictionary<string, string>
+            {
+                ["312"] = "Kaffe med fløte og 1 ts sukker. Aldri svart.",
+            };
+
+            var matprofiler = context.Matprofiler
+                .Include(m => m.Pasient)
+                .Where(m => korrektKaffeTe.Keys.Contains(m.Pasient.Romnummer))
+                .ToList();
+
+            var endret = false;
+            foreach (var matprofil in matprofiler)
+            {
+                if (!korrektKaffeTe.TryGetValue(matprofil.Pasient.Romnummer, out var korrekt))
+                    continue;
+
+                if (matprofil.KaffeTe == korrekt)
+                    continue;
+
+                if (InneholderFremmedsprak(matprofil.KaffeTe))
+                {
+                    matprofil.KaffeTe = korrekt;
+                    endret = true;
+                }
+            }
+
+            if (endret)
+                context.SaveChanges();
+        }
+
+        private static bool InneholderFremmedsprak(string tekst)
+        {
+            if (string.IsNullOrWhiteSpace(tekst))
+                return false;
+
+            var lower = tekst.ToLowerInvariant();
+            string[] fremmedOrd =
+            [
+                "azucar", "azúcar", "sin ", "dos ", "pero", "cafe", "café",
+                "tea", "sugar", "without", "cukier", "herbata", "bez ",
+            ];
+
+            return fremmedOrd.Any(lower.Contains);
         }
     }
 }
