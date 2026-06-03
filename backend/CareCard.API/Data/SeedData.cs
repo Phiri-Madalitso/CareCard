@@ -14,6 +14,7 @@ namespace CareCard.API.Data
             SeedMatprofiler(context);
             SeedStellprofiler(context);
             OppdaterManglendeMatprofilFelt(context);
+            SeedAnsatte(context);
         }
 
         private static void SeedPasienter(CareCardDbContext context)
@@ -232,6 +233,45 @@ namespace CareCard.API.Data
 
             if (endret)
                 context.SaveChanges();
+        }
+
+        private static void SeedAnsatte(CareCardDbContext context)
+        {
+            if (context.Ansatte.Any())
+                return;
+
+            var passordHash = BCrypt.Net.BCrypt.HashPassword("CareCard123");
+
+            context.Ansatte.AddRange(
+                new Ansatt
+                {
+                    Fornavn = "Madalitso",
+                    Etternavn = "Skjelnes",
+                    Epost = "ansatt@carecard.no",
+                    PassordHash = passordHash,
+                    Rolle = "ansatt",
+                    AvdelingId = 1,
+                },
+                new Ansatt
+                {
+                    Fornavn = "Marit",
+                    Etternavn = "Olsen",
+                    Epost = "sykepleier@carecard.no",
+                    PassordHash = passordHash,
+                    Rolle = "sykepleier",
+                    AvdelingId = 1,
+                },
+                new Ansatt
+                {
+                    Fornavn = "Kari",
+                    Etternavn = "Nordmann",
+                    Epost = "leder@carecard.no",
+                    PassordHash = passordHash,
+                    Rolle = "leder",
+                    AvdelingId = 1,
+                });
+
+            context.SaveChanges();
         }
     }
 }

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { IconChevronRight, IconLogout } from '@tabler/icons-react';
 import Navbar from '../components/Navbar';
 import { useSpråk, getHilsenKey, formatDato, getInitialer } from '../hooks/useSprak';
+import { loggUt } from '../services/authService';
 
 const AVDELINGER = [
   { id: 1, navn: 'Langtidsavdeling', enhetsnummer: 'Avdeling 1' },
@@ -17,9 +18,7 @@ function Avdelingsvalg() {
   const fornavn = brukerNavn.split(' ')[0];
 
   const handleLoggUt = () => {
-    localStorage.removeItem('innlogget');
-    localStorage.removeItem('rolle');
-    localStorage.removeItem('navn');
+    loggUt();
     navigate('/');
   };
 

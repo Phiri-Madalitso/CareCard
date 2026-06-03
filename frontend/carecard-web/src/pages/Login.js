@@ -3,12 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { IconMail, IconLock, IconEye, IconEyeOff, IconAlertCircle, IconChevronDown } from '@tabler/icons-react';
 import CareCardLogo from '../components/CareCardLogo';
 import { useSpråk } from '../hooks/useSprak';
-
-const BRUKERE = [
-  { epost: 'ansatt@carecard.no', passord: 'CareCard123', rolle: 'ansatt', navn: 'Madalitso Skjelnes' },
-  { epost: 'sykepleier@carecard.no', passord: 'CareCard123', rolle: 'sykepleier', navn: 'Marit Olsen' },
-  { epost: 'leder@carecard.no', passord: 'CareCard123', rolle: 'leder', navn: 'Kari Nordmann' },
-];
+import { loggInn } from '../services/authService';
 
 const MAX_FORSOK = 5;
 const LOCK_DURATION_MS = 15 * 60 * 1000;
@@ -53,6 +48,7 @@ function Login() {
   const [feilEkstra, setFeilEkstra] = useState('');
   const [forsok, setForsok] = useState(0);
   const [lastet, setLastet] = useState(false);
+  const [loggerInn, setLoggerInn] = useState(false);
   const [språkMenyÅpen, setSpråkMenyÅpen] = useState(false);
   const lockTimerRef = useRef(null);
   const språkMenyRef = useRef(null);
@@ -86,8 +82,8 @@ function Login() {
     if (feilMelding) clearFeil();
   };
 
-  const handleLogin = () => {
-    if (lastet) return;
+  const handleLogin = async () => {
+    if (lastet || loggerInn) return;
 
     if (!epost.trim() || !passord) {
       setFeilMelding('fyllInn');
@@ -95,18 +91,18 @@ function Login() {
       return;
     }
 
-    const bruker = BRUKERE.find(
-      (b) => b.epost === epost && b.passord === passord
-    );
+    setLoggerInn(true);
+    clearFeil();
 
-    if (bruker) {
-      localStorage.setItem('innlogget', 'true');
-      localStorage.setItem('rolle', bruker.rolle);
-      localStorage.setItem('navn', bruker.navn);
+    try {
+      const data = await loggInn(epost.trim(), passord);
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('rolle', data.rolle);
+      localStorage.setItem('navn', data.navn);
+      localStorage.setItem('ansattId', String(data.ansattId));
       setForsok(0);
-      clearFeil();
       navigate('/avdelingsvalg');
-    } else {
+    } catch {
       const nyttForsok = forsok + 1;
       setForsok(nyttForsok);
 
@@ -124,6 +120,8 @@ function Login() {
         setFeilMelding('feilEpostPassord');
         setFeilEkstra(` (${nyttForsok}/${MAX_FORSOK})`);
       }
+    } finally {
+      setLoggerInn(false);
     }
   };
 

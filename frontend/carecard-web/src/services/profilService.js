@@ -1,50 +1,52 @@
-import { API_BASE_URL } from '../config/api';
+import { apiFetch, getAnsattId } from './apiClient';
 
 export async function hentMatprofil(pasientId) {
-  const response = await fetch(`${API_BASE_URL}/api/matprofil/pasient/${pasientId}`);
+  const response = await apiFetch(`/api/matprofil/pasient/${pasientId}`);
   if (response.status === 404) return null;
   if (!response.ok) throw new Error('Kunne ikke hente matprofil.');
   return response.json();
 }
 
 export async function hentStellprofil(pasientId) {
-  const response = await fetch(`${API_BASE_URL}/api/stellprofil/pasient/${pasientId}`);
+  const response = await apiFetch(`/api/stellprofil/pasient/${pasientId}`);
   if (response.status === 404) return null;
   if (!response.ok) throw new Error('Kunne ikke hente stellprofil.');
   return response.json();
 }
 
 export async function sendEndringsforslag(forslag) {
-  const response = await fetch(`${API_BASE_URL}/api/endringsforslag`, {
+  const response = await apiFetch('/api/endringsforslag', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(forslag),
+    body: JSON.stringify({
+      ...forslag,
+      opprettetAvId: forslag.opprettetAvId ?? getAnsattId(),
+    }),
   });
   if (!response.ok) throw new Error('Kunne ikke sende endringsforslag.');
   return response.json();
 }
 
 export async function hentVentendeForslag() {
-  const response = await fetch(`${API_BASE_URL}/api/endringsforslag/venter`);
+  const response = await apiFetch('/api/endringsforslag/venter');
   if (!response.ok) throw new Error('Kunne ikke hente ventende forslag.');
   return response.json();
 }
 
-export async function godkjennForslag(id, behandletAvId = 1) {
-  const response = await fetch(
-    `${API_BASE_URL}/api/endringsforslag/${id}/godkjenn?behandletAvId=${behandletAvId}`,
+export async function godkjennForslag(id, behandletAvId = getAnsattId()) {
+  const response = await apiFetch(
+    `/api/endringsforslag/${id}/godkjenn?behandletAvId=${behandletAvId}`,
     { method: 'PUT' }
   );
   if (!response.ok) throw new Error('Kunne ikke godkjenne forslag.');
 }
 
-export async function avvisForslag(id, kommentar, behandletAvId = 1) {
+export async function avvisForslag(id, kommentar, behandletAvId = getAnsattId()) {
   const params = new URLSearchParams({
     behandletAvId: String(behandletAvId),
     kommentar: kommentar || '',
   });
-  const response = await fetch(
-    `${API_BASE_URL}/api/endringsforslag/${id}/avvis?${params}`,
+  const response = await apiFetch(
+    `/api/endringsforslag/${id}/avvis?${params}`,
     { method: 'PUT' }
   );
   if (!response.ok) throw new Error('Kunne ikke avvise forslag.');

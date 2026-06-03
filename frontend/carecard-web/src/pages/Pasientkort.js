@@ -17,6 +17,7 @@ import {
   hentStellprofil,
   sendEndringsforslag,
 } from '../services/profilService';
+import { getAnsattId } from '../services/apiClient';
 
 const FELT_KONFIG = {
   fortykningsbehov: { profilType: 'Matprofil', apiFelt: 'KonsistensDrikke', kilde: 'mat', felt: 'konsistensDrikke' },
@@ -221,7 +222,7 @@ function Pasientkort() {
         feltNavn: cfg.apiFelt,
         gammelVerdi: gammel,
         nyVerdi: ny,
-        opprettetAvId: 1,
+        opprettetAvId: getAnsattId(),
       });
       setVisToast(true);
       setAktivtFelt(null);

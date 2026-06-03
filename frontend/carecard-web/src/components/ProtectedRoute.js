@@ -1,9 +1,9 @@
 import { Navigate } from 'react-router-dom';
 
 function ProtectedRoute({ children }) {
-  const erInnlogget = localStorage.getItem('innlogget') === 'true';
+  const token = localStorage.getItem('token');
 
-  if (!erInnlogget) {
+  if (!token) {
     return <Navigate to="/" replace />;
   }
 

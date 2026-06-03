@@ -1,11 +1,13 @@
 ﻿using System.Reflection;
 using CareCard.API.Data;
 using CareCard.API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CareCard.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class EndringsForslagController : ControllerBase
@@ -30,6 +32,10 @@ namespace CareCard.API.Controllers
         [HttpPost]
         public async Task<ActionResult<EndringsForslag>> OpprettForslag(EndringsForslag forslag)
         {
+            if (!await _context.Pasienter.AnyAsync(p => p.Id == forslag.PasientId))
+                return BadRequest("Ugyldig pasientId.");
+
+            forslag.Pasient = null;
             forslag.OpprettetTidspunkt = DateTime.Now;
             forslag.Status = "Venter";
 
@@ -39,6 +45,7 @@ namespace CareCard.API.Controllers
             return CreatedAtAction(nameof(HentVentende), new { id = forslag.Id }, forslag);
         }
 
+        [Authorize(Roles = "sykepleier,leder")]
         [HttpPut("{id}/godkjenn")]
         public async Task<IActionResult> GodkjennForslag(int id, [FromQuery] int behandletAvId)
         {
@@ -59,6 +66,7 @@ namespace CareCard.API.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "sykepleier,leder")]
         [HttpPut("{id}/avvis")]
         public async Task<IActionResult> AvvisForslag(int id, [FromQuery] int behandletAvId, [FromQuery] string kommentar)
         {

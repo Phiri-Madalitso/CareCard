@@ -4,7 +4,7 @@ namespace CareCard.API.Models
     {
         public int Id { get; set; }
         public int PasientId { get; set; }
-        public Pasient Pasient { get; set; } = null!;
+        public Pasient? Pasient { get; set; }
         public string ProfilType { get; set; } = string.Empty; // Matprofil / Stellprofil
         public string FeltNavn { get; set; } = string.Empty;
         public string GammelVerdi { get; set; } = string.Empty;

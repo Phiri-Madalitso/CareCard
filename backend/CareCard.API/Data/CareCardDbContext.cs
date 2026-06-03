@@ -15,6 +15,7 @@ namespace CareCard.API.Data
         public DbSet<Matprofil> Matprofiler { get; set; }
         public DbSet<Stellprofil> Stellprofiler { get; set; }
         public DbSet<EndringsForslag> EndringsForslag { get; set; }
+        public DbSet<Ansatt> Ansatte { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -35,6 +36,10 @@ namespace CareCard.API.Data
                 .HasOne(e => e.Pasient)
                 .WithMany()
                 .HasForeignKey(e => e.PasientId);
+
+            modelBuilder.Entity<Ansatt>()
+                .HasIndex(a => a.Epost)
+                .IsUnique();
         }
     }
 }

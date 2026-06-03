@@ -1,8 +1,8 @@
-import { API_BASE_URL } from '../config/api';
+import { apiFetch } from './apiClient';
 import { hentMatprofil } from './profilService';
 
 export async function hentPasienter(avdelingId) {
-  const response = await fetch(`${API_BASE_URL}/api/Pasient`);
+  const response = await apiFetch('/api/Pasient');
 
   if (!response.ok) {
     throw new Error('Kunne ikke hente pasienter fra API-et.');

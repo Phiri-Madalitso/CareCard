@@ -1,10 +1,12 @@
 ﻿using CareCard.API.Data;
 using CareCard.API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CareCard.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class MatprofilController : ControllerBase
