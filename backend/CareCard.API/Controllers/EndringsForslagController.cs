@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using CareCard.API.Data;
 using CareCard.API.Models;
+using CareCard.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +14,12 @@ namespace CareCard.API.Controllers
     public class EndringsForslagController : ControllerBase
     {
         private readonly CareCardDbContext _context;
+        private readonly TranslatorService _translator;
 
-        public EndringsForslagController(CareCardDbContext context)
+        public EndringsForslagController(CareCardDbContext context, TranslatorService translator)
         {
             _context = context;
+            _translator = translator;
         }
 
         [HttpGet("venter")]
@@ -38,6 +41,7 @@ namespace CareCard.API.Controllers
             forslag.Pasient = null;
             forslag.OpprettetTidspunkt = DateTime.Now;
             forslag.Status = "Venter";
+            forslag.NyVerdiOversatt = await _translator.TranslaterTilNorsk(forslag.NyVerdi);
 
             _context.EndringsForslag.Add(forslag);
             await _context.SaveChangesAsync();

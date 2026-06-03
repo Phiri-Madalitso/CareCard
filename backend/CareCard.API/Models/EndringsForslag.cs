@@ -9,6 +9,7 @@ namespace CareCard.API.Models
         public string FeltNavn { get; set; } = string.Empty;
         public string GammelVerdi { get; set; } = string.Empty;
         public string NyVerdi { get; set; } = string.Empty;
+        public string? NyVerdiOversatt { get; set; }
         public string Status { get; set; } = "Venter"; // Venter / Godkjent / Avvist
         public int OpprettetAvId { get; set; }
         public DateTime OpprettetTidspunkt { get; set; } = DateTime.Now;
