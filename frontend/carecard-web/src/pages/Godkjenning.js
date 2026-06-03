@@ -33,6 +33,7 @@ function mapForslagTilVisning(apiForslag) {
     felt: apiForslag.feltNavn,
     gammelVerdi: apiForslag.gammelVerdi,
     nyVerdi: apiForslag.nyVerdi,
+    nyVerdiOversatt: apiForslag.nyVerdiOversatt ?? null,
     sendtAv: `Ansatt #${apiForslag.opprettetAvId}`,
     dato: formatDato(apiForslag.opprettetTidspunkt),
   };
@@ -143,16 +144,34 @@ function Godkjenning() {
 
             <p style={styles.sendtAv}>{t.sendtAv} {f.sendtAv}</p>
 
-            <div style={styles.endringRad}>
+            <div style={{
+              ...styles.endringRad,
+              alignItems: f.nyVerdiOversatt ? 'start' : 'center',
+            }}
+            >
               <div style={styles.gammel}>
                 <p style={styles.endringLabel}>{t.gammel}</p>
                 <p style={styles.endringTekst}>{f.gammelVerdi}</p>
               </div>
               <div style={styles.pil}>→</div>
-              <div style={styles.ny}>
-                <p style={styles.endringLabel}>{t.ny}</p>
-                <p style={styles.endringTekst}>{f.nyVerdi}</p>
-              </div>
+              {f.nyVerdiOversatt ? (
+                <div style={styles.nyOversatt}>
+                  <div style={styles.oversattSeksjon}>
+                    <p style={styles.endringLabel}>{t.original}</p>
+                    <p style={styles.endringTekst}>{f.nyVerdi}</p>
+                  </div>
+                  <div style={styles.oversattSeksjon}>
+                    <p style={styles.endringLabel}>{t.oversattTilNorsk}</p>
+                    <p style={styles.endringTekst}>{f.nyVerdiOversatt}</p>
+                  </div>
+                  <p style={styles.advarselBoks}>{t.automatiskOversattAdvarsel}</p>
+                </div>
+              ) : (
+                <div style={styles.ny}>
+                  <p style={styles.endringLabel}>{t.ny}</p>
+                  <p style={styles.endringTekst}>{f.nyVerdi}</p>
+                </div>
+              )}
             </div>
 
             {visKommentar === f.id && (
@@ -293,6 +312,26 @@ const styles = {
     background: '#E6F4EA',
     borderRadius: '10px',
     padding: '10px 12px',
+  },
+  nyOversatt: {
+    background: '#E6F4EA',
+    borderRadius: '10px',
+    padding: '10px 12px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+  },
+  oversattSeksjon: {
+    margin: 0,
+  },
+  advarselBoks: {
+    margin: 0,
+    padding: '8px 10px',
+    borderRadius: '8px',
+    background: '#FAEEDA',
+    color: '#854F0B',
+    fontSize: '12px',
+    lineHeight: '1.4',
   },
   pil: {
     fontSize: '18px',

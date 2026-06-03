@@ -51,3 +51,15 @@ export async function avvisForslag(id, kommentar, behandletAvId = getAnsattId())
   );
   if (!response.ok) throw new Error('Kunne ikke avvise forslag.');
 }
+
+export async function oversettTekster(tekster, malSprak) {
+  if (malSprak === 'no' || !tekster.length) return tekster;
+
+  const response = await apiFetch('/api/oversett', {
+    method: 'POST',
+    body: JSON.stringify({ tekster, malSprak }),
+  });
+  if (!response.ok) throw new Error('Kunne ikke oversette tekst.');
+  const data = await response.json();
+  return data.tekster;
+}

@@ -16,6 +16,7 @@ import {
   hentMatprofil,
   hentStellprofil,
   sendEndringsforslag,
+  oversettTekster,
 } from '../services/profilService';
 import { getAnsattId } from '../services/apiClient';
 
@@ -34,6 +35,27 @@ const FELT_KONFIG = {
   viktigeHensyn: { profilType: 'Stellprofil', apiFelt: 'ViktigeHensyn', kilde: 'stell', felt: 'viktigeHensyn' },
   rutiner: { profilType: 'Stellprofil', apiFelt: 'Rutiner', kilde: 'stell', felt: 'rutiner' },
 };
+
+const MAT_OVERSATT_FELTER = [
+  'allergier', 'konsistensDrikke', 'kaffeTe', 'drikke', 'frokost',
+  'kvelds', 'konsistensMat', 'hvorSpiser', 'redskap', 'misliker',
+];
+
+const STELL_OVERSATT_FELTER = [
+  'stellPreferanser', 'kommunikasjon', 'viktigeHensyn', 'rutiner',
+];
+
+async function oversettProfil(profil, felter, malSprak) {
+  if (!profil || malSprak === 'no') return profil;
+
+  const tekster = felter.map((f) => profil[f] ?? '');
+  const oversatt = await oversettTekster(tekster, malSprak);
+  const copy = { ...profil };
+  felter.forEach((f, i) => {
+    copy[f] = oversatt[i] ?? tekster[i];
+  });
+  return copy;
+}
 
 function getInitials(fornavn, etternavn) {
   const f = fornavn.trim().split(' ')[0][0] || '';
@@ -127,18 +149,44 @@ function RedigerbartFelt({
 function Pasientkort() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { t } = useSpråk();
+  const { språk, t } = useSpråk();
   const pasient = location.state?.pasient;
 
   const [activeTab, setActiveTab] = useState('matprofil');
   const [matprofil, setMatprofil] = useState(null);
   const [stellprofil, setStellprofil] = useState(null);
+  const [matprofilVisning, setMatprofilVisning] = useState(null);
+  const [stellprofilVisning, setStellprofilVisning] = useState(null);
   const [laster, setLaster] = useState(true);
+  const [oversetterInnhold, setOversetterInnhold] = useState(false);
   const [feil, setFeil] = useState('');
   const [aktivtFelt, setAktivtFelt] = useState(null);
   const [nyVerdi, setNyVerdi] = useState('');
   const [sender, setSender] = useState(false);
   const [visToast, setVisToast] = useState(false);
+
+  const oppdaterVisning = useCallback(async (mat, stell, malSprak) => {
+    if (malSprak === 'no') {
+      setMatprofilVisning(mat);
+      setStellprofilVisning(stell);
+      return;
+    }
+
+    setOversetterInnhold(true);
+    try {
+      const [matV, stellV] = await Promise.all([
+        oversettProfil(mat, MAT_OVERSATT_FELTER, malSprak),
+        oversettProfil(stell, STELL_OVERSATT_FELTER, malSprak),
+      ]);
+      setMatprofilVisning(matV);
+      setStellprofilVisning(stellV);
+    } catch {
+      setMatprofilVisning(mat);
+      setStellprofilVisning(stell);
+    } finally {
+      setOversetterInnhold(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!pasient?.id) {
@@ -183,7 +231,20 @@ function Pasientkort() {
     };
   }, [pasient?.id, t.kunneIkkeHenteProfil, t.ingenProfilData]);
 
-  const hentVerdi = useCallback(
+  useEffect(() => {
+    if (!matprofil && !stellprofil) return undefined;
+    let avbrutt = false;
+
+    async function oppdaterVedSprakbytte() {
+      await oppdaterVisning(matprofil, stellprofil, språk);
+      if (avbrutt) return;
+    }
+
+    oppdaterVedSprakbytte();
+    return () => { avbrutt = true; };
+  }, [språk, matprofil, stellprofil, oppdaterVisning]);
+
+  const hentOriginalVerdi = useCallback(
     (feltNavn) => {
       const cfg = FELT_KONFIG[feltNavn];
       if (!cfg) return '';
@@ -193,18 +254,30 @@ function Pasientkort() {
     [matprofil, stellprofil]
   );
 
+  const hentVisningsVerdi = useCallback(
+    (feltNavn) => {
+      const cfg = FELT_KONFIG[feltNavn];
+      if (!cfg) return '';
+      const profil = cfg.kilde === 'mat'
+        ? (matprofilVisning ?? matprofil)
+        : (stellprofilVisning ?? stellprofil);
+      return profil?.[cfg.felt] ?? '';
+    },
+    [matprofil, stellprofil, matprofilVisning, stellprofilVisning]
+  );
+
   const sistEndretTekst = formatSistEndret(
     activeTab === 'matprofil' ? matprofil?.sistEndret : stellprofil?.sistEndret
   );
 
-  const allergierListe = (matprofil?.allergier || '')
+  const allergierListe = ((matprofilVisning ?? matprofil)?.allergier || '')
     .split(',')
     .map((a) => a.trim())
     .filter(Boolean);
 
   const sendForslag = async (feltNavn) => {
     const cfg = FELT_KONFIG[feltNavn];
-    const gammel = hentVerdi(feltNavn);
+    const gammel = hentOriginalVerdi(feltNavn);
     const ny = nyVerdi.trim();
 
     if (!ny || ny === gammel.trim()) {
@@ -299,6 +372,9 @@ function Pasientkort() {
 
         {feil && <p style={styles.feilTekst}>{feil}</p>}
         {laster && <p style={styles.lasterTekst}>{t.laster}</p>}
+        {oversetterInnhold && !laster && (
+          <p style={styles.lasterTekst}>{t.oversetterInnhold}</p>
+        )}
 
         {!laster && (
           <>
@@ -335,7 +411,7 @@ function Pasientkort() {
                   feltNavn="fortykningsbehov"
                   label={t.fortykningsbehov}
                   ikon={null}
-                  verdi={hentVerdi('fortykningsbehov')}
+                  verdi={hentVisningsVerdi('fortykningsbehov')}
                   erAktiv={aktivtFelt === 'fortykningsbehov'}
                   nyVerdi={nyVerdi}
                   sender={sender}
@@ -351,7 +427,7 @@ function Pasientkort() {
                     feltNavn="kaffeTe"
                     label={t.kaffeTe}
                     ikon={null}
-                    verdi={hentVerdi('kaffeTe')}
+                    verdi={hentVisningsVerdi('kaffeTe')}
                     erAktiv={aktivtFelt === 'kaffeTe'}
                     nyVerdi={nyVerdi}
                     sender={sender}
@@ -365,7 +441,7 @@ function Pasientkort() {
                     feltNavn="drikke"
                     label={t.drikke}
                     ikon={null}
-                    verdi={hentVerdi('drikke')}
+                    verdi={hentVisningsVerdi('drikke')}
                     erAktiv={aktivtFelt === 'drikke'}
                     nyVerdi={nyVerdi}
                     sender={sender}
@@ -381,7 +457,7 @@ function Pasientkort() {
                   feltNavn="frokost"
                   label={t.frokost}
                   ikon={null}
-                  verdi={hentVerdi('frokost')}
+                  verdi={hentVisningsVerdi('frokost')}
                   erAktiv={aktivtFelt === 'frokost'}
                   nyVerdi={nyVerdi}
                   sender={sender}
@@ -396,7 +472,7 @@ function Pasientkort() {
                   feltNavn="kveldsmat"
                   label={t.kveldsmat}
                   ikon={<IconMoon size={14} color="#6B7280" />}
-                  verdi={hentVerdi('kveldsmat')}
+                  verdi={hentVisningsVerdi('kveldsmat')}
                   erAktiv={aktivtFelt === 'kveldsmat'}
                   nyVerdi={nyVerdi}
                   sender={sender}
@@ -412,7 +488,7 @@ function Pasientkort() {
                     feltNavn="konsistensMat"
                     label={t.konsistensMat}
                     ikon={null}
-                    verdi={hentVerdi('konsistensMat')}
+                    verdi={hentVisningsVerdi('konsistensMat')}
                     erAktiv={aktivtFelt === 'konsistensMat'}
                     nyVerdi={nyVerdi}
                     sender={sender}
@@ -426,7 +502,7 @@ function Pasientkort() {
                     feltNavn="hvorSpiser"
                     label={t.hvorSpiser}
                     ikon={null}
-                    verdi={hentVerdi('hvorSpiser')}
+                    verdi={hentVisningsVerdi('hvorSpiser')}
                     erAktiv={aktivtFelt === 'hvorSpiser'}
                     nyVerdi={nyVerdi}
                     sender={sender}
@@ -442,7 +518,7 @@ function Pasientkort() {
                   feltNavn="redskap"
                   label={t.redskap}
                   ikon={<IconToolsKitchen2 size={14} color="#6B7280" />}
-                  verdi={hentVerdi('redskap')}
+                  verdi={hentVisningsVerdi('redskap')}
                   erAktiv={aktivtFelt === 'redskap'}
                   nyVerdi={nyVerdi}
                   sender={sender}
@@ -457,7 +533,7 @@ function Pasientkort() {
                   feltNavn="likerIkke"
                   label={t.likerIkke}
                   ikon={<IconX size={14} color="#6B7280" />}
-                  verdi={hentVerdi('likerIkke')}
+                  verdi={hentVisningsVerdi('likerIkke')}
                   erAktiv={aktivtFelt === 'likerIkke'}
                   nyVerdi={nyVerdi}
                   sender={sender}
@@ -485,7 +561,7 @@ function Pasientkort() {
                   feltNavn="stellpreferanser"
                   label={t.stellpreferanser}
                   ikon={null}
-                  verdi={hentVerdi('stellpreferanser')}
+                  verdi={hentVisningsVerdi('stellpreferanser')}
                   erAktiv={aktivtFelt === 'stellpreferanser'}
                   nyVerdi={nyVerdi}
                   sender={sender}
@@ -499,7 +575,7 @@ function Pasientkort() {
                   feltNavn="kommunikasjonsbehov"
                   label={t.kommunikasjonsbehov}
                   ikon={null}
-                  verdi={hentVerdi('kommunikasjonsbehov')}
+                  verdi={hentVisningsVerdi('kommunikasjonsbehov')}
                   erAktiv={aktivtFelt === 'kommunikasjonsbehov'}
                   nyVerdi={nyVerdi}
                   sender={sender}
@@ -513,7 +589,7 @@ function Pasientkort() {
                   feltNavn="viktigeHensyn"
                   label={t.viktigeHensyn}
                   ikon={null}
-                  verdi={hentVerdi('viktigeHensyn')}
+                  verdi={hentVisningsVerdi('viktigeHensyn')}
                   erAktiv={aktivtFelt === 'viktigeHensyn'}
                   nyVerdi={nyVerdi}
                   sender={sender}
@@ -527,7 +603,7 @@ function Pasientkort() {
                   feltNavn="rutiner"
                   label={t.rutiner}
                   ikon={null}
-                  verdi={hentVerdi('rutiner')}
+                  verdi={hentVisningsVerdi('rutiner')}
                   erAktiv={aktivtFelt === 'rutiner'}
                   nyVerdi={nyVerdi}
                   sender={sender}

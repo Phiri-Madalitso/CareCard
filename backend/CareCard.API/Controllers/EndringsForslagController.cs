@@ -90,6 +90,8 @@ namespace CareCard.API.Controllers
 
         private async Task<bool> ApplyGodkjentForslag(EndringsForslag forslag)
         {
+            var verdiTilProfil = forslag.NyVerdiOversatt ?? forslag.NyVerdi;
+
             if (forslag.ProfilType.Equals("Matprofil", StringComparison.OrdinalIgnoreCase))
             {
                 var matprofil = await _context.Matprofiler
@@ -98,7 +100,7 @@ namespace CareCard.API.Controllers
                 if (matprofil == null)
                     return false;
 
-                if (!SetPropertyValue(matprofil, forslag.FeltNavn, forslag.NyVerdi))
+                if (!SetPropertyValue(matprofil, forslag.FeltNavn, verdiTilProfil))
                     return false;
 
                 matprofil.SistEndret = DateTime.Now;
@@ -114,7 +116,7 @@ namespace CareCard.API.Controllers
                 if (stellprofil == null)
                     return false;
 
-                if (!SetPropertyValue(stellprofil, forslag.FeltNavn, forslag.NyVerdi))
+                if (!SetPropertyValue(stellprofil, forslag.FeltNavn, verdiTilProfil))
                     return false;
 
                 stellprofil.SistEndret = DateTime.Now;
