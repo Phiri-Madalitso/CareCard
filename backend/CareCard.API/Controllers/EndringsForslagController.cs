@@ -25,11 +25,30 @@ namespace CareCard.API.Controllers
         [HttpGet("venter")]
         public async Task<ActionResult<IEnumerable<EndringsForslag>>> HentVentende()
         {
-            return await _context.EndringsForslag
+            var forslag = await _context.EndringsForslag
                 .Where(e => e.Status == "Venter")
                 .OrderBy(e => e.OpprettetTidspunkt)
                 .Include(e => e.Pasient)
                 .ToListAsync();
+
+            var endret = false;
+            foreach (var f in forslag)
+            {
+                if (!TrengerNyOversettelse(f))
+                    continue;
+
+                var oversatt = await _translator.TranslaterTilNorsk(f.NyVerdi, null);
+                if (string.IsNullOrWhiteSpace(oversatt))
+                    continue;
+
+                f.NyVerdiOversatt = oversatt;
+                endret = true;
+            }
+
+            if (endret)
+                await _context.SaveChangesAsync();
+
+            return forslag;
         }
 
         [HttpPost]
@@ -41,7 +60,9 @@ namespace CareCard.API.Controllers
             forslag.Pasient = null;
             forslag.OpprettetTidspunkt = DateTime.Now;
             forslag.Status = "Venter";
-            forslag.NyVerdiOversatt = await _translator.TranslaterTilNorsk(forslag.NyVerdi);
+            forslag.NyVerdiOversatt = await _translator.TranslaterTilNorsk(
+                forslag.NyVerdi,
+                forslag.KildeSprak);
 
             _context.EndringsForslag.Add(forslag);
             await _context.SaveChangesAsync();
@@ -125,6 +146,20 @@ namespace CareCard.API.Controllers
             }
 
             return false;
+        }
+
+        private static bool TrengerNyOversettelse(EndringsForslag forslag)
+        {
+            if (string.IsNullOrWhiteSpace(forslag.NyVerdi))
+                return false;
+
+            if (string.IsNullOrWhiteSpace(forslag.NyVerdiOversatt))
+                return true;
+
+            return string.Equals(
+                forslag.NyVerdiOversatt.Trim(),
+                forslag.NyVerdi.Trim(),
+                StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool SetPropertyValue(object target, string feltNavn, string nyVerdi)

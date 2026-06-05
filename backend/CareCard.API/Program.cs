@@ -75,6 +75,23 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();
+if (string.IsNullOrWhiteSpace(app.Configuration["Translator:Key"]))
+{
+    startupLogger.LogWarning(
+        "Translator:Key mangler — pasientkort-oversettelse og NyVerdiOversatt er deaktivert. " +
+        "Sett Translator__Key (og Translator__Region) i User Secrets eller App Service.");
+}
+else if (string.IsNullOrWhiteSpace(app.Configuration["Translator:Region"]))
+{
+    startupLogger.LogWarning(
+        "Translator:Region mangler — Azure Translator kan feile. Sett f.eks. swedencentral.");
+}
+else
+{
+    startupLogger.LogInformation("Azure Translator er konfigurert.");
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

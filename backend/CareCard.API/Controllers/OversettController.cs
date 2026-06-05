@@ -26,6 +26,9 @@ public class OversettController : ControllerBase
         if (string.IsNullOrWhiteSpace(request.MalSprak))
             return BadRequest("MalSprak må oppgis.");
 
+        if (!_translator.ErKonfigurert)
+            return StatusCode(503, "Azure Translator er ikke konfigurert på serveren.");
+
         var oversatt = await _translator.OversettFraNorsk(request.Tekster, request.MalSprak);
 
         return Ok(new OversettResponse { Tekster = oversatt.ToList() });

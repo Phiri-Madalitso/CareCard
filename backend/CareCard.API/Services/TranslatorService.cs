@@ -1,10 +1,16 @@
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace CareCard.API.Services;
 
 public class TranslatorService
 {
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+    };
+
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IConfiguration _configuration;
     private readonly ILogger<TranslatorService> _logger;
@@ -19,17 +25,72 @@ public class TranslatorService
         _logger = logger;
     }
 
-    public async Task<string?> TranslaterTilNorsk(string tekst)
+    public bool ErKonfigurert =>
+        !string.IsNullOrWhiteSpace(_configuration["Translator:Key"]);
+
+    public async Task<string?> TranslaterTilNorsk(string tekst, string? kildeSprak = null)
     {
         if (string.IsNullOrWhiteSpace(tekst))
             return null;
 
-        var result = await SendTranslateRequest(
-            new[] { tekst },
-            toLang: "nb",
-            fromLang: null);
+        if (string.IsNullOrWhiteSpace(_configuration["Translator:Key"]))
+        {
+            _logger.LogWarning("Translator:Key is not configured — skipping translation.");
+            return null;
+        }
 
-        return result[0];
+        try
+        {
+            // Auto-detect først — UI-språk styrer ikke om vi oversetter
+            var responses = await SendTranslateRequest(
+                new[] { tekst },
+                toLang: "nb",
+                fromLang: null,
+                fallbackToOriginal: false);
+
+            var entry = responses.FirstOrDefault();
+            var oversatt = entry?.TranslatedText;
+
+            // Kort/tvetydig tekst: prøv igjen med hint fra UI-språk (f.eks. es → solo leche)
+            if (string.IsNullOrWhiteSpace(oversatt)
+                && !string.IsNullOrWhiteSpace(kildeSprak)
+                && kildeSprak is not ("no" or "nb"))
+            {
+                var hintFrom = MapKildeSprakTilAzure(kildeSprak);
+                responses = await SendTranslateRequest(
+                    new[] { tekst },
+                    toLang: "nb",
+                    fromLang: hintFrom,
+                    fallbackToOriginal: false);
+                entry = responses.FirstOrDefault();
+                oversatt = entry?.TranslatedText;
+            }
+
+            if (string.IsNullOrWhiteSpace(oversatt))
+            {
+                _logger.LogWarning("Translation returned empty for text length {Length}.", tekst.Length);
+                return null;
+            }
+
+            if (ErNorsk(entry?.DetectedLanguage) && entry?.DetectedScore >= 0.5)
+            {
+                _logger.LogDebug("Text detected as Norwegian — skipping NyVerdiOversatt.");
+                return null;
+            }
+
+            if (string.Equals(oversatt.Trim(), tekst.Trim(), StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogDebug("Translation identical to original — skipping NyVerdiOversatt.");
+                return null;
+            }
+
+            return oversatt;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Translation to Norwegian failed.");
+            return null;
+        }
     }
 
     public async Task<IReadOnlyList<string>> OversettFraNorsk(
@@ -40,27 +101,34 @@ public class TranslatorService
             return tekster;
 
         var azureMal = MapTilAzureSprak(malSprak);
-        return await SendTranslateRequest(tekster, azureMal, fromLang: "nb");
+        var responses = await SendTranslateRequest(
+            tekster,
+            azureMal,
+            fromLang: "nb",
+            fallbackToOriginal: true);
+
+        return responses.Select(r => r.TranslatedText ?? string.Empty).ToList();
     }
 
-    private async Task<IReadOnlyList<string>> SendTranslateRequest(
+    private async Task<IReadOnlyList<TranslateResult>> SendTranslateRequest(
         IReadOnlyList<string> tekster,
         string toLang,
-        string? fromLang)
+        string? fromLang,
+        bool fallbackToOriginal)
     {
-        var result = new string[tekster.Count];
+        var results = new TranslateResult[tekster.Count];
         var toTranslate = new List<(int Index, string Text)>();
 
         for (var i = 0; i < tekster.Count; i++)
         {
             if (string.IsNullOrWhiteSpace(tekster[i]))
-                result[i] = tekster[i];
+                results[i] = new TranslateResult { TranslatedText = tekster[i] };
             else
                 toTranslate.Add((i, tekster[i]));
         }
 
         if (toTranslate.Count == 0)
-            return result;
+            return results;
 
         var key = _configuration["Translator:Key"];
         var endpoint = _configuration["Translator:Endpoint"]
@@ -70,16 +138,19 @@ public class TranslatorService
         if (string.IsNullOrWhiteSpace(key))
         {
             _logger.LogWarning("Translator:Key is not configured — skipping translation.");
-            for (var i = 0; i < tekster.Count; i++)
-                result[i] = tekster[i];
-            return result;
+            if (fallbackToOriginal)
+            {
+                for (var i = 0; i < tekster.Count; i++)
+                    results[i] = new TranslateResult { TranslatedText = tekster[i] };
+            }
+            return results;
         }
 
         try
         {
             var client = _httpClientFactory.CreateClient();
             var baseUrl = endpoint.TrimEnd('/');
-            var fromQuery = string.IsNullOrWhiteSpace(fromLang) ? "" : $"&from={fromLang}";
+            var fromQuery = string.IsNullOrWhiteSpace(fromLang) ? string.Empty : $"&from={fromLang}";
             var requestUri = $"{baseUrl}/translate?api-version=3.0&to={toLang}{fromQuery}";
 
             using var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
@@ -91,24 +162,53 @@ public class TranslatorService
                 toTranslate.Select(x => new { Text = x.Text }).ToArray());
 
             var response = await client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
+            var responseBody = await response.Content.ReadAsStringAsync();
 
-            var translated = await response.Content.ReadFromJsonAsync<TranslateResponse[]>();
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError(
+                    "Translator API returned {StatusCode}: {Body}",
+                    (int)response.StatusCode,
+                    responseBody);
+                response.EnsureSuccessStatusCode();
+            }
+
+            var translated = JsonSerializer.Deserialize<TranslateResponse[]>(responseBody, JsonOptions);
 
             for (var j = 0; j < toTranslate.Count; j++)
             {
                 var (index, original) = toTranslate[j];
-                result[index] = translated?[j]?.Translations?.FirstOrDefault()?.Text ?? original;
+                var entry = translated?[j];
+                var translatedText = entry?.Translations?.FirstOrDefault()?.Text;
+
+                results[index] = new TranslateResult
+                {
+                    TranslatedText = translatedText ?? (fallbackToOriginal ? original : string.Empty),
+                    DetectedLanguage = entry?.DetectedLanguage?.Language,
+                    DetectedScore = entry?.DetectedLanguage?.Score,
+                };
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Translation to {ToLang} failed.", toLang);
-            for (var i = 0; i < tekster.Count; i++)
-                result[i] = tekster[i];
+            if (fallbackToOriginal)
+            {
+                for (var i = 0; i < tekster.Count; i++)
+                    results[i] = new TranslateResult { TranslatedText = tekster[i] };
+            }
         }
 
-        return result;
+        return results;
+    }
+
+    private static bool ErNorsk(string? languageCode)
+    {
+        if (string.IsNullOrWhiteSpace(languageCode))
+            return false;
+
+        var code = languageCode.Split('-')[0].ToLowerInvariant();
+        return code is "nb" or "no" or "nn";
     }
 
     private static string MapTilAzureSprak(string malSprak) =>
@@ -121,10 +221,32 @@ public class TranslatorService
             _ => malSprak,
         };
 
+    private static string MapKildeSprakTilAzure(string kildeSprak) =>
+        MapTilAzureSprak(kildeSprak);
+
+    private sealed class TranslateResult
+    {
+        public string? TranslatedText { get; set; }
+        public string? DetectedLanguage { get; set; }
+        public double? DetectedScore { get; set; }
+    }
+
     private sealed class TranslateResponse
     {
+        [JsonPropertyName("detectedLanguage")]
+        public DetectedLanguage? DetectedLanguage { get; set; }
+
         [JsonPropertyName("translations")]
         public Translation[]? Translations { get; set; }
+    }
+
+    private sealed class DetectedLanguage
+    {
+        [JsonPropertyName("language")]
+        public string Language { get; set; } = string.Empty;
+
+        [JsonPropertyName("score")]
+        public double Score { get; set; }
     }
 
     private sealed class Translation

@@ -16,5 +16,9 @@ namespace CareCard.API.Models
         public int? BehandletAvId { get; set; }
         public DateTime? BehandletTidspunkt { get; set; }
         public string Kommentar { get; set; } = string.Empty;
+
+        /// <summary>UI-språk ved innsending (no, pt, es …). Sendes fra frontend, lagres ikke.</summary>
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        public string? KildeSprak { get; set; }
     }
 }
