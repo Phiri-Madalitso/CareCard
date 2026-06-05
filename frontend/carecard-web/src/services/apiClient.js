@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '../config/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5062';
 
 export function getAuthHeaders(json = false) {
   const headers = {};
