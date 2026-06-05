@@ -102,7 +102,14 @@ function Login() {
       localStorage.setItem('ansattId', String(data.ansattId));
       setForsok(0);
       navigate('/avdelingsvalg');
-    } catch {
+    } catch (err) {
+      if (err.message === 'SERVER') {
+        setFeilMelding('serverFeil');
+        setFeilEkstra('');
+        setLoggerInn(false);
+        return;
+      }
+
       const nyttForsok = forsok + 1;
       setForsok(nyttForsok);
 

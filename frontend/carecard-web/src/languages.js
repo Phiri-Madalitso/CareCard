@@ -8,6 +8,7 @@ export const tekster = {
     kontoLåst: 'Kontoen er låst',
     glemmtPassord: 'Glemt passord?',
     feilEpostPassord: 'Feil epost eller passord – prøv igjen',
+    serverFeil: 'Kunne ikke kontakte serveren. Sjekk at API-et kjører og prøv igjen.',
     fyllInn: 'Fyll inn epost og passord.',
     kontoLåstMelding: 'Kontoen er låst etter 5 forsøk. Prøv igjen om 15 minutter.',
 
@@ -95,6 +96,7 @@ export const tekster = {
     kontoLåst: 'Account locked',
     glemmtPassord: 'Forgot password?',
     feilEpostPassord: 'Wrong email or password – try again',
+    serverFeil: 'Could not reach the server. Check that the API is running and try again.',
     fyllInn: 'Please enter email and password.',
     kontoLåstMelding: 'Account locked after 5 attempts. Try again in 15 minutes.',
 
@@ -182,6 +184,7 @@ export const tekster = {
     kontoLåst: 'Cuenta bloqueada',
     glemmtPassord: '¿Olvidaste tu contraseña?',
     feilEpostPassord: 'Email o contraseña incorrectos – inténtalo de nuevo',
+    serverFeil: 'No se pudo contactar con el servidor. Comprueba que la API esté en ejecución.',
     fyllInn: 'Por favor ingresa email y contraseña.',
     kontoLåstMelding: 'Cuenta bloqueada tras 5 intentos. Inténtalo en 15 minutos.',
 
@@ -269,6 +272,7 @@ export const tekster = {
     kontoLåst: 'Konto zablokowane',
     glemmtPassord: 'Zapomniałeś hasła?',
     feilEpostPassord: 'Nieprawidłowy e-mail lub hasło – spróbuj ponownie',
+    serverFeil: 'Nie można połączyć się z serwerem. Sprawdź, czy API działa.',
     fyllInn: 'Wprowadź e-mail i hasło.',
     kontoLåstMelding: 'Konto zablokowane po 5 próbach. Spróbuj ponownie za 15 minut.',
 
@@ -356,6 +360,7 @@ export const tekster = {
     kontoLåst: 'Conta bloqueada',
     glemmtPassord: 'Esqueceu a senha?',
     feilEpostPassord: 'E-mail ou senha incorretos – tente novamente',
+    serverFeil: 'Não foi possível contactar o servidor. Verifique se a API está em execução.',
     fyllInn: 'Preencha o e-mail e a senha.',
     kontoLåstMelding: 'Conta bloqueada após 5 tentativas. Tente novamente em 15 minutos.',
 

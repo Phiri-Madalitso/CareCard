@@ -53,7 +53,20 @@ builder.Services.AddCors(options =>
         }
         else
         {
-            policy.WithOrigins("http://localhost:3000");
+            var configuredOrigins = builder.Configuration["Frontend:AllowedOrigins"]?
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                ?? [];
+
+            policy.SetIsOriginAllowed(origin =>
+            {
+                if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+                    return false;
+
+                if (uri.Host.EndsWith(".azurestaticapps.net", StringComparison.OrdinalIgnoreCase))
+                    return true;
+
+                return configuredOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase);
+            });
         }
 
         policy.AllowAnyHeader().AllowAnyMethod();
@@ -82,8 +95,15 @@ app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    SeedData.Initialize(services);
+    try
+    {
+        SeedData.Initialize(scope.ServiceProvider);
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "SeedData failed — API starts anyway. Check database connection.");
+    }
 }
 
 app.Run();
