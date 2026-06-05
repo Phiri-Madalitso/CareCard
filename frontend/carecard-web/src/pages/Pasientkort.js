@@ -183,6 +183,7 @@ function Pasientkort() {
     } catch {
       setMatprofilVisning(mat);
       setStellprofilVisning(stell);
+      setFeil(t.kunneIkkeOversette);
     } finally {
       setOversetterInnhold(false);
     }
@@ -295,6 +296,7 @@ function Pasientkort() {
         feltNavn: cfg.apiFelt,
         gammelVerdi: gammel,
         nyVerdi: ny,
+        kildeSprak: språk,
         opprettetAvId: getAnsattId(),
       });
       setVisToast(true);

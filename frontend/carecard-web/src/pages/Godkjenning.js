@@ -26,14 +26,21 @@ function mapForslagTilVisning(apiForslag) {
     ? `${pasient.fornavn} ${pasient.etternavn}`
     : `Pasient ${apiForslag.pasientId}`;
 
+  const nyVerdi = apiForslag.nyVerdi ?? '';
+  const nyVerdiOversatt = apiForslag.nyVerdiOversatt ?? null;
+  const harOversettelse = Boolean(
+    nyVerdiOversatt?.trim()
+    && nyVerdiOversatt.trim().toLowerCase() !== nyVerdi.trim().toLowerCase()
+  );
+
   return {
     id: apiForslag.id,
     pasient: pasientNavn,
     kategori: apiForslag.profilType,
     felt: apiForslag.feltNavn,
     gammelVerdi: apiForslag.gammelVerdi,
-    nyVerdi: apiForslag.nyVerdi,
-    nyVerdiOversatt: apiForslag.nyVerdiOversatt ?? null,
+    nyVerdi,
+    nyVerdiOversatt: harOversettelse ? nyVerdiOversatt : null,
     sendtAv: `Ansatt #${apiForslag.opprettetAvId}`,
     dato: formatDato(apiForslag.opprettetTidspunkt),
   };
