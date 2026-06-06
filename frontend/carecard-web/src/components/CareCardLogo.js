@@ -1,27 +1,16 @@
 import React from 'react';
 
-const heights = {
-  sm: 52,
-  header: 42,
-  nav: 108,
-  md: 76,
-  lg: 100,
-};
-
 function CareCardLogo({ size = 'md', variant = 'default' }) {
-  const height = heights[size] || heights.md;
-  const width = Math.round(height * (320 / 128));
   const onNav = variant === 'nav';
+  const sizeClass = onNav ? 'carecard-logo--nav' : `carecard-logo--${size}`;
 
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 320 128"
-      width={width}
-      height={height}
       role="img"
       aria-label="CareCard"
-      className={`carecard-logo${onNav ? ' carecard-logo--nav' : ''}`}
+      className={`carecard-logo ${sizeClass}`}
     >
       <rect
         width="320"

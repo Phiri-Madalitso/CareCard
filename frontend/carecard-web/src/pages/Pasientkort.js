@@ -25,7 +25,6 @@ import {
   typography,
   card,
   radii,
-  topBar,
   shadows,
 } from '../styles/theme';
 
@@ -336,20 +335,20 @@ function Pasientkort() {
     <div className="app-shell">
       <Navbar />
       <div className="app-container">
-        <div style={topBar}>
-          <button type="button" style={styles.iconButton} onClick={() => navigate(-1)}>
-            <IconChevronLeft size={22} color="#13171F" />
+        <div className="app-topbar">
+          <button type="button" className="app-icon-btn" onClick={() => navigate(-1)} aria-label={t.tilbake}>
+            <IconChevronLeft size={22} color="#0F172A" />
           </button>
-          <span style={styles.topbarTitle}>{t.pasientkort}</span>
-          <div style={{ width: 22 }} />
+          <span className="app-topbar-title">{t.pasientkort}</span>
+          <div className="app-icon-btn" aria-hidden="true" />
         </div>
 
-        <div style={styles.profileHeader}>
-          <div style={styles.avatar}>
+        <div className="app-profile-header">
+          <div className="app-profile-avatar" style={{ backgroundColor: colors.link }}>
             {getInitials(pasient.fornavn, pasient.etternavn)}
           </div>
           <div>
-            <h1 style={styles.patientName}>
+            <h1 className="app-profile-name">
               {pasient.fornavn} {pasient.etternavn}
             </h1>
             <p style={styles.patientMeta}>
@@ -384,17 +383,17 @@ function Pasientkort() {
 
         {!laster && (
           <>
-            <div style={styles.tabContainer}>
+            <div className="app-tab-bar">
               <button
                 type="button"
-                style={{ ...styles.tab, ...(activeTab === 'matprofil' ? styles.tabActive : {}) }}
+                className={`app-tab-btn${activeTab === 'matprofil' ? ' app-tab-btn--active' : ''}`}
                 onClick={() => setActiveTab('matprofil')}
               >
                 {t.matprofil}
               </button>
               <button
                 type="button"
-                style={{ ...styles.tab, ...(activeTab === 'stellprofil' ? styles.tabActive : {}) }}
+                className={`app-tab-btn${activeTab === 'stellprofil' ? ' app-tab-btn--active' : ''}`}
                 onClick={() => setActiveTab('stellprofil')}
               >
                 {t.stellprofil}

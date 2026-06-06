@@ -14,7 +14,6 @@ import {
   typography,
   card,
   radii,
-  topBar,
   shadows,
 } from '../styles/theme';
 
@@ -122,15 +121,12 @@ function Godkjenning() {
       <Navbar />
 
       <div className="app-container">
-        <div style={topBar}>
-          <IconChevronLeft
-            size={22}
-            color="#2E6BFF"
-            onClick={() => navigate(-1)}
-            style={{ cursor: 'pointer' }}
-          />
-          <p style={styles.tittel}>{t.tilGodkjenning}</p>
-          <div style={{ width: 22 }} />
+        <div className="app-topbar">
+          <button type="button" className="app-icon-btn" onClick={() => navigate(-1)} aria-label={t.tilbake}>
+            <IconChevronLeft size={22} color="#2E6BFF" />
+          </button>
+          <p className="app-topbar-title">{t.tilGodkjenning}</p>
+          <div className="app-icon-btn" aria-hidden="true" />
         </div>
 
         {feil && <p style={styles.feil}>{feil}</p>}

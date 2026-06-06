@@ -66,15 +66,20 @@ function Navbar() {
               onClick={() => navigate('/godkjenning')}
               aria-label={t.varsler}
             >
-              <IconBell size={26} stroke={1.75} color="#FFFFFF" />
+              <IconBell size={22} stroke={1.75} color="#FFFFFF" />
               {antallVentende > 0 && (
                 <span className="app-header-notify-badge">{antallVentende}</span>
               )}
             </button>
           )}
-          <button type="button" className="app-header-logout" onClick={handleLoggUt}>
-            <IconLogout size={18} stroke={2} color="#FFFFFF" />
-            <span>{t.loggUt}</span>
+          <button
+            type="button"
+            className="app-header-logout"
+            onClick={handleLoggUt}
+            aria-label={t.loggUt}
+          >
+            <IconLogout size={20} stroke={2} color="#FFFFFF" />
+            <span className="app-header-logout-label">{t.loggUt}</span>
           </button>
           <div className="app-header-avatar" aria-hidden="true">
             {getInitialer(brukerNavn)}
