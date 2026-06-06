@@ -33,9 +33,9 @@ export const spacing = {
 };
 
 export const layout = {
-  maxWidth: 560,
-  maxWidthWide: 720,
-  navbarHeight: 72,
+  maxWidth: 1100,
+  maxWidthNarrow: 480,
+  navbarHeight: 80,
 };
 
 export const typography = {
@@ -60,18 +60,6 @@ export const pageShell = {
   minHeight: '100vh',
   backgroundColor: colors.background,
   fontFamily: typography.fontFamily,
-};
-
-export const pageContent = {
-  maxWidth: layout.maxWidth,
-  margin: '0 auto',
-  padding: `${spacing.lg}px ${spacing.lg}px ${spacing.xxl}px`,
-  boxSizing: 'border-box',
-};
-
-export const pageContentWide = {
-  ...pageContent,
-  maxWidth: layout.maxWidthWide,
 };
 
 export const card = {
@@ -120,6 +108,7 @@ export const topBar = {
   justifyContent: 'space-between',
   marginBottom: spacing.lg,
   paddingTop: spacing.sm,
+  gap: spacing.md,
 };
 
 export const sectionTitle = {

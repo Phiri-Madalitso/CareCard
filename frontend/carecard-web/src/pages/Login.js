@@ -10,7 +10,6 @@ import {
   typography,
   shadows,
   radii,
-  card,
   inputBase,
   btnPrimary,
 } from '../styles/theme';
@@ -148,44 +147,50 @@ function Login() {
   };
 
   return (
-    <div style={styles.page}>
-      <div style={styles.språkRad} ref={språkMenyRef}>
-        <button
-          type="button"
-          style={styles.språkKnapp}
-          onClick={() => setSpråkMenyÅpen(!språkMenyÅpen)}
-          aria-expanded={språkMenyÅpen}
-          aria-haspopup="listbox"
-        >
-          <SpråkFlagg kode={valgtSpråk.flagKode} />
-          <span>{valgtSpråk.navn}</span>
-          <IconChevronDown size={16} color="#6B7280" />
-        </button>
-        {språkMenyÅpen && (
-          <div style={styles.språkMeny} role="listbox">
-            {SPRÅK_ALTERNATIVER.map((s) => (
-              <button
-                key={s.value}
-                type="button"
-                role="option"
-                aria-selected={språk === s.value}
-                style={{
-                  ...styles.språkMenyValg,
-                  ...(språk === s.value ? styles.språkMenyValgAktiv : {}),
-                }}
-                onClick={() => {
-                  setSpråk(s.value);
-                  setSpråkMenyÅpen(false);
-                }}
-              >
-                <SpråkFlagg kode={s.flagKode} />
-                <span>{s.navn}</span>
-              </button>
-            ))}
+    <div className="app-login-shell">
+      <header className="app-header app-header--login">
+        <div className="app-header-inner app-header-inner--login">
+          <div className="app-login-lang" ref={språkMenyRef}>
+            <button
+              type="button"
+              style={styles.språkKnapp}
+              onClick={() => setSpråkMenyÅpen(!språkMenyÅpen)}
+              aria-expanded={språkMenyÅpen}
+              aria-haspopup="listbox"
+            >
+              <SpråkFlagg kode={valgtSpråk.flagKode} />
+              <span>{valgtSpråk.navn}</span>
+              <IconChevronDown size={16} color="#6B7280" />
+            </button>
+            {språkMenyÅpen && (
+              <div style={styles.språkMeny} role="listbox">
+                {SPRÅK_ALTERNATIVER.map((s) => (
+                  <button
+                    key={s.value}
+                    type="button"
+                    role="option"
+                    aria-selected={språk === s.value}
+                    style={{
+                      ...styles.språkMenyValg,
+                      ...(språk === s.value ? styles.språkMenyValgAktiv : {}),
+                    }}
+                    onClick={() => {
+                      setSpråk(s.value);
+                      setSpråkMenyÅpen(false);
+                    }}
+                  >
+                    <SpråkFlagg kode={s.flagKode} />
+                    <span>{s.navn}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-        )}
-      </div>
-      <div style={styles.loginCard}>
+        </div>
+      </header>
+
+      <div className="app-login-body">
+      <div className="app-login-card">
       <div style={styles.logoSection}>
         <CareCardLogo size="lg" />
         <p style={styles.tagline}>{t.tagline}</p>
@@ -264,44 +269,35 @@ function Login() {
         </button>
       </form>
       </div>
+      </div>
     </div>
   );
 }
 
 const styles = {
-  page: {
-    position: 'relative',
-    fontFamily: typography.fontFamily,
-    minHeight: '100vh',
-    boxSizing: 'border-box',
-    backgroundColor: colors.primaryLight,
+  logoSection: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: `${spacing.lg}px`,
+    marginBottom: spacing.lg,
   },
-  loginCard: {
-    ...card,
-    width: '100%',
-    maxWidth: 440,
-    padding: `${spacing.xxl}px ${spacing.xl}px ${spacing.xl}px`,
-    boxShadow: shadows.elevated,
-  },
-  språkRad: {
-    position: 'absolute',
-    top: spacing.lg,
-    right: spacing.lg,
-    zIndex: 10,
+  tagline: {
+    marginTop: spacing.md,
+    marginBottom: 0,
+    fontSize: 15,
+    color: colors.textMuted,
+    textAlign: 'center',
+    lineHeight: 1.5,
+    maxWidth: 300,
   },
   språkKnapp: {
     display: 'flex',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: 8,
     border: `1px solid ${colors.border}`,
-    borderRadius: radii.md,
-    padding: '8px 14px',
-    fontSize: 14,
+    borderRadius: radii.sm,
+    padding: '6px 12px',
+    fontSize: 13,
     color: colors.text,
     background: colors.surface,
     cursor: 'pointer',
@@ -343,24 +339,10 @@ const styles = {
     background: '#F0F7FF',
     color: '#185FA5',
   },
-  logoSection: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-  },
-  tagline: {
-    marginTop: spacing.md,
-    fontSize: 16,
-    color: colors.textMuted,
-    textAlign: 'center',
-    lineHeight: 1.5,
-    maxWidth: 320,
-  },
   form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   errorBox: {
     display: 'flex',
@@ -395,6 +377,8 @@ const styles = {
   },
   input: {
     ...inputBase,
+    padding: '12px 14px 12px 40px',
+    fontSize: 15,
   },
   eyeButton: {
     position: 'absolute',
@@ -422,7 +406,9 @@ const styles = {
   },
   submitButton: {
     ...btnPrimary,
-    marginTop: spacing.sm,
+    padding: '14px 24px',
+    fontSize: 15,
+    marginTop: spacing.xs,
     width: '100%',
   },
 };

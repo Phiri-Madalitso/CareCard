@@ -16,6 +16,7 @@ namespace CareCard.API.Data
             OppdaterManglendeMatprofilFelt(context);
             KorrigerFeilLagretProfiltekst(context);
             SeedAnsatte(context);
+            OppdaterAnsattNavn(context);
         }
 
         private static void SeedPasienter(CareCardDbContext context)
@@ -246,7 +247,7 @@ namespace CareCard.API.Data
             context.Ansatte.AddRange(
                 new Ansatt
                 {
-                    Fornavn = "Madalitso",
+                    Fornavn = "Kemilly",
                     Etternavn = "Skjelnes",
                     Epost = "ansatt@carecard.no",
                     PassordHash = passordHash,
@@ -272,6 +273,18 @@ namespace CareCard.API.Data
                     AvdelingId = 1,
                 });
 
+            context.SaveChanges();
+        }
+
+        private static void OppdaterAnsattNavn(CareCardDbContext context)
+        {
+            var ansatt = context.Ansatte
+                .FirstOrDefault(a => a.Epost == "ansatt@carecard.no" && a.Fornavn == "Madalitso");
+
+            if (ansatt == null)
+                return;
+
+            ansatt.Fornavn = "Kemilly";
             context.SaveChanges();
         }
 

@@ -4,7 +4,7 @@ import { IconBell } from '@tabler/icons-react';
 import CareCardLogo from './CareCardLogo';
 import { useSpråk } from '../hooks/useSprak';
 import { hentVentendeForslag } from '../services/profilService';
-import { colors, layout, spacing, typography, shadows } from '../styles/theme';
+import { colors, spacing, typography } from '../styles/theme';
 
 function Navbar() {
   const navigate = useNavigate();
@@ -41,11 +41,11 @@ function Navbar() {
   }, [skalViseVarsler]);
 
   return (
-    <header style={styles.outer}>
-      <div style={styles.inner}>
-        <CareCardLogo size="sm" />
+    <header className="app-header">
+      <div className="app-header-inner">
+        <CareCardLogo size="nav" />
 
-        {skalViseVarsler && (
+        {skalViseVarsler ? (
           <button
             type="button"
             style={styles.varslerKnapp}
@@ -53,7 +53,7 @@ function Navbar() {
             aria-label={t.varsler}
           >
             <div style={styles.varslerIkonWrap}>
-              <IconBell size={24} stroke={1.75} color={colors.text} />
+              <IconBell size={26} stroke={1.75} color={colors.text} />
               {antallVentende > 0 && (
                 <div style={styles.badge}>
                   {antallVentende}
@@ -62,6 +62,8 @@ function Navbar() {
             </div>
             <span style={styles.varslerLabel}>{t.varsler}</span>
           </button>
+        ) : (
+          <div style={{ width: 48 }} aria-hidden="true" />
         )}
       </div>
     </header>
@@ -69,25 +71,6 @@ function Navbar() {
 }
 
 const styles = {
-  outer: {
-    background: colors.surface,
-    borderBottom: `1px solid ${colors.borderLight}`,
-    boxShadow: shadows.sm,
-    position: 'sticky',
-    top: 0,
-    zIndex: 100,
-  },
-  inner: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    maxWidth: layout.maxWidthWide,
-    margin: '0 auto',
-    padding: `${spacing.md}px ${spacing.lg}px`,
-    minHeight: layout.navbarHeight,
-    boxSizing: 'border-box',
-    fontFamily: typography.fontFamily,
-  },
   varslerKnapp: {
     display: 'flex',
     flexDirection: 'column',
@@ -99,14 +82,15 @@ const styles = {
     padding: `${spacing.xs}px ${spacing.sm}px`,
     borderRadius: 12,
     fontFamily: typography.fontFamily,
+    marginLeft: 'auto',
   },
   varslerIkonWrap: {
     position: 'relative',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    width: 32,
-    height: 32,
+    width: 36,
+    height: 36,
   },
   varslerLabel: {
     fontSize: 13,

@@ -23,8 +23,6 @@ import {
   colors,
   spacing,
   typography,
-  pageShell,
-  pageContent,
   card,
   radii,
   topBar,
@@ -322,9 +320,9 @@ function Pasientkort() {
 
   if (!pasient) {
     return (
-      <div style={pageShell}>
+      <div className="app-shell">
         <Navbar />
-        <div style={styles.page}>
+        <div className="app-container">
           <p style={styles.feilTekst}>{t.ingenPasientValgt}</p>
           <button type="button" className="cc-btn-secondary" style={styles.suggestButton} onClick={() => navigate(-1)}>
             {t.tilbake}
@@ -335,9 +333,9 @@ function Pasientkort() {
   }
 
   return (
-    <div style={pageShell}>
+    <div className="app-shell">
       <Navbar />
-      <div style={styles.page}>
+      <div className="app-container">
         <div style={topBar}>
           <button type="button" style={styles.iconButton} onClick={() => navigate(-1)}>
             <IconChevronLeft size={22} color="#13171F" />
@@ -430,7 +428,7 @@ function Pasientkort() {
                   onSend={sendForslag}
                 />
 
-                <div style={styles.grid}>
+                <div className="app-field-grid">
                   <RedigerbartFelt
                     feltNavn="kaffeTe"
                     label={t.kaffeTe}
@@ -491,7 +489,7 @@ function Pasientkort() {
                   onSend={sendForslag}
                 />
 
-                <div style={styles.grid}>
+                <div className="app-field-grid">
                   <RedigerbartFelt
                     feltNavn="konsistensMat"
                     label={t.konsistensMat}
@@ -646,10 +644,6 @@ function Pasientkort() {
 }
 
 const styles = {
-  page: {
-    ...pageContent,
-    paddingTop: spacing.md,
-  },
   iconButton: {
     background: 'none',
     border: 'none',
@@ -773,11 +767,6 @@ const styles = {
     fontSize: 15,
     lineHeight: 1.65,
     color: colors.alertRedText,
-  },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: spacing.md,
   },
   lastChanged: {
     display: 'flex',

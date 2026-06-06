@@ -2,6 +2,7 @@ import React from 'react';
 
 const sizes = {
   sm: { width: 80, height: 52, topFont: 12, bottomFont: 10, radius: 8, letterSpacing: 4 },
+  nav: { width: 132, height: 84, topFont: 18, bottomFont: 14, radius: 10, letterSpacing: 5 },
   md: { width: 120, height: 76, topFont: 16, bottomFont: 13, radius: 10, letterSpacing: 6 },
   lg: { width: 160, height: 100, topFont: 22, bottomFont: 17, radius: 12, letterSpacing: 8 },
 };

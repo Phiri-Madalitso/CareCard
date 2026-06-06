@@ -8,8 +8,6 @@ import {
   colors,
   spacing,
   typography,
-  pageShell,
-  pageContent,
   cardInteractive,
   radii,
   sectionTitle,
@@ -33,16 +31,16 @@ function Avdelingsvalg() {
   };
 
   return (
-    <div style={pageShell}>
+    <div className="app-shell">
       <Navbar />
-      <div style={styles.page}>
-        <header style={styles.header}>
+      <div className="app-container">
+        <header className="app-welcome-row">
           <div>
             <p style={styles.greeting}>{t[getHilsenKey()]},</p>
             <h1 style={styles.name}>{fornavn} 👋</h1>
             <p style={styles.date}>{formatDato(locale)}</p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="app-user-actions">
             <button type="button" onClick={handleLoggUt} style={styles.loggUtKnapp}>
               <IconLogout size={22} stroke={1.75} color="#13171F" />
               <span>{t.loggUt}</span>
@@ -53,7 +51,7 @@ function Avdelingsvalg() {
 
         <h2 style={styles.question}>{t.hvilkenAvdeling}</h2>
 
-        <div style={styles.cardList}>
+        <div className="app-card-grid">
           {AVDELINGER.map((avdeling) => (
             <button
               key={avdeling.id}
@@ -76,16 +74,6 @@ function Avdelingsvalg() {
 }
 
 const styles = {
-  page: {
-    ...pageContent,
-    paddingTop: spacing.xl,
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: spacing.xl,
-  },
   greeting: {
     fontSize: 15,
     color: colors.textMuted,
@@ -120,19 +108,15 @@ const styles = {
     ...sectionTitle,
     marginBottom: spacing.lg,
   },
-  cardList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: spacing.md,
-  },
   card: {
     ...cardInteractive,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: `${spacing.lg}px ${spacing.lg}px`,
+    padding: `${spacing.lg}px`,
     textAlign: 'left',
     width: '100%',
+    minHeight: 100,
     fontFamily: typography.fontFamily,
   },
   cardContent: {

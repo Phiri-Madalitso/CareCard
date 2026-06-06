@@ -8,8 +8,6 @@ import {
   colors,
   spacing,
   typography,
-  pageShell,
-  pageContent,
   cardInteractive,
   radii,
   topBar,
@@ -101,9 +99,9 @@ function Pasientliste() {
 
   if (laster) {
     return (
-      <div style={pageShell}>
+      <div className="app-shell">
         <Navbar />
-        <div style={styles.page}>
+        <div className="app-container">
           <p style={styles.statusText}>Laster pasienter...</p>
         </div>
       </div>
@@ -112,9 +110,9 @@ function Pasientliste() {
 
   if (feil) {
     return (
-      <div style={pageShell}>
+      <div className="app-shell">
         <Navbar />
-        <div style={styles.page}>
+        <div className="app-container">
           <p style={styles.errorText}>{feil}</p>
         </div>
       </div>
@@ -122,9 +120,9 @@ function Pasientliste() {
   }
 
   return (
-    <div style={pageShell}>
+    <div className="app-shell">
       <Navbar />
-      <div style={styles.page}>
+      <div className="app-container">
         <div style={topBar}>
         <button type="button" style={styles.backButton} onClick={() => navigate(-1)}>
           <IconChevronLeft size={22} color="#13171F" />
@@ -150,7 +148,7 @@ function Pasientliste() {
         />
       </div>
 
-      <div style={styles.filterRow}>
+      <div className="app-filter-row">
         {filters.map((f) => {
           const dotColor =
             f.key === 'allergi' ? '#A32D2D' :
@@ -182,7 +180,7 @@ function Pasientliste() {
         })}
       </div>
 
-      <div style={styles.patientList}>
+      <div className="app-card-grid-2">
         {filtered.map((p, index) => (
           <button
             key={p.id}
@@ -223,10 +221,6 @@ function Pasientliste() {
 }
 
 const styles = {
-  page: {
-    ...pageContent,
-    paddingTop: spacing.md,
-  },
   backButton: {
     background: 'none',
     border: 'none',
@@ -281,12 +275,6 @@ const styles = {
     boxSizing: 'border-box',
     outline: 'none',
   },
-  filterRow: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    marginBottom: spacing.lg,
-  },
   filterButton: {
     display: 'flex',
     alignItems: 'center',
@@ -304,11 +292,6 @@ const styles = {
     height: 8,
     borderRadius: '50%',
     flexShrink: 0,
-  },
-  patientList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: spacing.md,
   },
   patientCard: {
     ...cardInteractive,

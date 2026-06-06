@@ -12,8 +12,6 @@ import {
   colors,
   spacing,
   typography,
-  pageShell,
-  pageContentWide,
   card,
   radii,
   topBar,
@@ -120,10 +118,10 @@ function Godkjenning() {
   };
 
   return (
-    <div style={pageShell}>
+    <div className="app-shell">
       <Navbar />
 
-      <div style={styles.innhold}>
+      <div className="app-container">
         <div style={topBar}>
           <IconChevronLeft
             size={22}
@@ -162,16 +160,15 @@ function Godkjenning() {
 
             <p style={styles.sendtAv}>{t.sendtAv} {f.sendtAv}</p>
 
-            <div style={{
-              ...styles.endringRad,
-              alignItems: f.nyVerdiOversatt ? 'start' : 'center',
-            }}
+            <div
+              className="app-change-row"
+              style={{ alignItems: f.nyVerdiOversatt ? 'start' : 'center' }}
             >
               <div style={styles.gammel}>
                 <p style={styles.endringLabel}>{t.gammel}</p>
                 <p style={styles.endringTekst}>{f.gammelVerdi}</p>
               </div>
-              <div style={styles.pil}>→</div>
+              <div className="app-change-arrow">→</div>
               {f.nyVerdiOversatt ? (
                 <div style={styles.nyOversatt}>
                   <div style={styles.oversattSeksjon}>
@@ -234,10 +231,6 @@ function Godkjenning() {
 }
 
 const styles = {
-  innhold: {
-    ...pageContentWide,
-    paddingTop: spacing.md,
-  },
   tittel: {
     fontSize: 20,
     fontWeight: 700,
@@ -307,13 +300,6 @@ const styles = {
     color: colors.textMuted,
     margin: `0 0 ${spacing.md}px`,
   },
-  endringRad: {
-    display: 'grid',
-    gridTemplateColumns: '1fr auto 1fr',
-    gap: spacing.md,
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
   gammel: {
     background: colors.alertRedBg,
     borderRadius: radii.md,
@@ -343,11 +329,6 @@ const styles = {
     color: colors.alertYellowText,
     fontSize: 13,
     lineHeight: 1.5,
-  },
-  pil: {
-    fontSize: 20,
-    color: colors.textMuted,
-    textAlign: 'center',
   },
   endringLabel: {
     fontSize: 11,
