@@ -302,7 +302,7 @@ button:focus-visible {
   gap: 8px;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .app-home-dept-list {
     display: grid;
     grid-template-columns: repeat(2, 1fr);

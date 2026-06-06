@@ -279,9 +279,9 @@ namespace CareCard.API.Data
         private static void OppdaterAnsattNavn(CareCardDbContext context)
         {
             var ansatt = context.Ansatte
-                .FirstOrDefault(a => a.Epost == "ansatt@carecard.no" && a.Fornavn == "Madalitso");
+                .FirstOrDefault(a => a.Epost == "ansatt@carecard.no");
 
-            if (ansatt == null)
+            if (ansatt == null || ansatt.Fornavn == "Kemilly")
                 return;
 
             ansatt.Fornavn = "Kemilly";

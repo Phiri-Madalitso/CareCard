@@ -44,6 +44,26 @@ namespace CareCard.API.Controllers
             });
         }
 
+        [Authorize]
+        [HttpGet("me")]
+        public async Task<ActionResult<UserProfileDto>> Me()
+        {
+            var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(idClaim) || !int.TryParse(idClaim, out var ansattId))
+                return Unauthorized();
+
+            var ansatt = await _context.Ansatte.FindAsync(ansattId);
+            if (ansatt == null || !ansatt.ErAktiv)
+                return Unauthorized();
+
+            return Ok(new UserProfileDto
+            {
+                Navn = $"{ansatt.Fornavn} {ansatt.Etternavn}",
+                Rolle = ansatt.Rolle,
+                AnsattId = ansatt.Id,
+            });
+        }
+
         private string GenerateToken(Models.Ansatt ansatt)
         {
             var jwtKey = _configuration["Jwt:Key"]!;

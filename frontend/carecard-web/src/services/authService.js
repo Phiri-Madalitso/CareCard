@@ -1,4 +1,5 @@
 import { API_BASE_URL } from '../config/api';
+import { apiFetch } from './apiClient';
 
 export async function loggInn(epost, passord) {
   let response;
@@ -28,4 +29,14 @@ export function loggUt() {
   localStorage.removeItem('rolle');
   localStorage.removeItem('navn');
   localStorage.removeItem('ansattId');
+}
+
+export async function hentInnloggetProfil() {
+  const response = await apiFetch('/api/auth/me');
+
+  if (!response.ok) {
+    throw new Error('Kunne ikke hente profil');
+  }
+
+  return response.json();
 }

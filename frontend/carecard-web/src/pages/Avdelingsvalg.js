@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { IconBell, IconChevronRight, IconLogout } from '@tabler/icons-react';
 import CareCardLogo from '../components/CareCardLogo';
 import { useSpråk, getHilsenKey, formatDato, getInitialer } from '../hooks/useSprak';
-import { loggUt } from '../services/authService';
+import { loggUt, hentInnloggetProfil } from '../services/authService';
 import { hentVentendeForslag } from '../services/profilService';
 
 const AVDELINGER = [
@@ -15,11 +15,34 @@ const AVDELINGER = [
 function Avdelingsvalg() {
   const navigate = useNavigate();
   const { t, locale } = useSpråk();
-  const brukerNavn = localStorage.getItem('navn') || 'Bruker';
+  const [brukerNavn, setBrukerNavn] = useState(() => localStorage.getItem('navn') || 'Bruker');
   const fornavn = brukerNavn.split(' ')[0];
   const rolle = localStorage.getItem('rolle');
   const skalViseVarsler = rolle === 'sykepleier' || rolle === 'leder';
   const [antallVentende, setAntallVentende] = useState(0);
+
+  useEffect(() => {
+    let avbrutt = false;
+
+    async function oppdaterProfil() {
+      try {
+        const profil = await hentInnloggetProfil();
+        if (avbrutt) return;
+        localStorage.setItem('navn', profil.navn);
+        localStorage.setItem('rolle', profil.rolle);
+        localStorage.setItem('ansattId', String(profil.ansattId));
+        setBrukerNavn(profil.navn);
+      } catch {
+        // Beholder cachet navn hvis API ikke svarer
+      }
+    }
+
+    oppdaterProfil();
+
+    return () => {
+      avbrutt = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!skalViseVarsler) return undefined;
