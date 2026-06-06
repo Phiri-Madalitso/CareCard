@@ -5,10 +5,16 @@ import Navbar from '../components/Navbar';
 import { useSpråk, getHilsenKey, formatDato } from '../hooks/useSprak';
 import { hentInnloggetProfil } from '../services/authService';
 
+const AVDELINGS_IKONER = {
+  1: IconHeart,
+  2: IconCalendar,
+  3: IconShield,
+};
+
 const AVDELINGER = [
-  { id: 1, navn: 'Langtidsavdeling', enhetsnummer: 'Avdeling 1', icon: IconHeart },
-  { id: 2, navn: 'Korttidsavdeling', enhetsnummer: 'Avdeling 2', icon: IconCalendar },
-  { id: 3, navn: 'Skjermet', enhetsnummer: 'Avdeling 3', icon: IconShield },
+  { id: 1, navn: 'Langtidsavdeling', enhetsnummer: 'Avdeling 1' },
+  { id: 2, navn: 'Korttidsavdeling', enhetsnummer: 'Avdeling 2' },
+  { id: 3, navn: 'Skjermet', enhetsnummer: 'Avdeling 3' },
 ];
 
 function Avdelingsvalg() {
@@ -53,7 +59,7 @@ function Avdelingsvalg() {
 
         <div className="app-home-dept-list">
           {AVDELINGER.map((avdeling) => {
-            const DeptIcon = avdeling.icon;
+            const DeptIcon = AVDELINGS_IKONER[avdeling.id];
             return (
               <button
                 key={avdeling.id}
