@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IconChevronRight } from '@tabler/icons-react';
+import { IconCalendar, IconChevronRight, IconHeart, IconShield } from '@tabler/icons-react';
 import Navbar from '../components/Navbar';
 import { useSpråk, getHilsenKey, formatDato } from '../hooks/useSprak';
 import { hentInnloggetProfil } from '../services/authService';
 
 const AVDELINGER = [
-  { id: 1, navn: 'Langtidsavdeling', enhetsnummer: 'Avdeling 1' },
-  { id: 2, navn: 'Korttidsavdeling', enhetsnummer: 'Avdeling 2' },
-  { id: 3, navn: 'Skjermet', enhetsnummer: 'Avdeling 3' },
+  { id: 1, navn: 'Langtidsavdeling', enhetsnummer: 'Avdeling 1', icon: IconHeart },
+  { id: 2, navn: 'Korttidsavdeling', enhetsnummer: 'Avdeling 2', icon: IconCalendar },
+  { id: 3, navn: 'Skjermet', enhetsnummer: 'Avdeling 3', icon: IconShield },
 ];
 
 function Avdelingsvalg() {
@@ -52,20 +52,26 @@ function Avdelingsvalg() {
         <h2 className="app-home-question">{t.hvilkenAvdeling}</h2>
 
         <div className="app-home-dept-list">
-          {AVDELINGER.map((avdeling) => (
-            <button
-              key={avdeling.id}
-              type="button"
-              className="app-home-dept-card cc-card-hover"
-              onClick={() => navigate('/pasienter', { state: { avdeling } })}
-            >
-              <div className="app-home-dept-text">
-                <span className="app-home-dept-title">{avdeling.navn}</span>
-                <span className="app-home-dept-subtitle">{avdeling.enhetsnummer}</span>
-              </div>
-              <IconChevronRight size={22} color="#6B7280" />
-            </button>
-          ))}
+          {AVDELINGER.map((avdeling) => {
+            const DeptIcon = avdeling.icon;
+            return (
+              <button
+                key={avdeling.id}
+                type="button"
+                className="app-home-dept-card cc-card-hover"
+                onClick={() => navigate('/pasienter', { state: { avdeling } })}
+              >
+                <div className="app-home-dept-icon">
+                  <DeptIcon size={22} stroke={1.75} />
+                </div>
+                <div className="app-home-dept-text">
+                  <span className="app-home-dept-title">{avdeling.navn}</span>
+                  <span className="app-home-dept-subtitle">{avdeling.enhetsnummer}</span>
+                </div>
+                <IconChevronRight size={22} color="#94A3B8" />
+              </button>
+            );
+          })}
         </div>
       </main>
     </div>

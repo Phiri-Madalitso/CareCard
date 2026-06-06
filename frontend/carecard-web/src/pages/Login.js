@@ -37,7 +37,7 @@ function SpråkFlagg({ kode }) {
 }
 
 const colorsLocal = {
-  teal: colors.primary,
+  brand: colors.primary,
   text: colors.text,
   textMuted: colors.textMuted,
   border: colors.border,
@@ -322,7 +322,7 @@ const styles = {
   },
   språkMenyValgAktiv: {
     background: '#F0F7FF',
-    color: '#185FA5',
+    color: colors.link,
   },
   form: {
     display: 'flex',
@@ -381,7 +381,7 @@ const styles = {
   },
   forgotLink: {
     fontSize: 14,
-    color: colorsLocal.teal,
+    color: colorsLocal.brand,
     textDecoration: 'none',
     background: 'none',
     border: 'none',

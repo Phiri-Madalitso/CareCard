@@ -153,7 +153,7 @@ function Pasientliste() {
           const dotColor =
             f.key === 'allergi' ? '#A32D2D' :
             f.key === 'dia' || f.key === 'fortykning' ? '#854F0B' :
-            '#185FA5';
+            '#2E6BFF';
           const isActive = activeFilter === f.key;
           return (
             <button
@@ -162,9 +162,9 @@ function Pasientliste() {
               className="cc-filter-btn"
               style={{
                 ...styles.filterButton,
-                backgroundColor: isActive ? '#13171F' : '#F9FAFB',
-                color: isActive ? '#fff' : '#13171F',
-                border: isActive ? '1px solid #13171F' : '1px solid #E5E7EB',
+                backgroundColor: isActive ? '#0D2B52' : '#FFFFFF',
+                color: isActive ? '#fff' : '#0F172A',
+                border: isActive ? '1px solid #0D2B52' : '1px solid #E2E8F0',
               }}
               onClick={() => setActiveFilter(f.key)}
             >

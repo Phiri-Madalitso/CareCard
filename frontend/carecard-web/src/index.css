@@ -1,3 +1,18 @@
+:root {
+  --cc-header: #0D2B52;
+  --cc-accent: #0D2B52;
+  --cc-accent-hover: #102d55;
+  --cc-accent-active: #081E3A;
+  --cc-secondary: #2E6BFF;
+  --cc-bg: #F4F8FC;
+  --cc-surface: #FFFFFF;
+  --cc-text: #0F172A;
+  --cc-text-muted: #64748B;
+  --cc-text-subtle: #94A3B8;
+  --cc-border: #E2E8F0;
+  --cc-border-light: #E8EEF4;
+}
+
 *,
 *::before,
 *::after {
@@ -13,8 +28,8 @@ body {
   font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 16px;
   line-height: 1.6;
-  color: #13171F;
-  background-color: #D4EEF1;
+  color: var(--cc-text);
+  background-color: var(--cc-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -41,14 +56,14 @@ button:disabled {
 input:focus-visible,
 textarea:focus-visible,
 button:focus-visible {
-  outline: 2px solid #207383;
+  outline: 2px solid var(--cc-accent);
   outline-offset: 2px;
 }
 
 /* ── Layout: responsiv container ── */
 .app-shell {
   min-height: 100vh;
-  background-color: #D4EEF1;
+  background-color: var(--cc-bg);
 }
 
 .app-container {
@@ -79,12 +94,12 @@ button:focus-visible {
 
 /* ── Header (navbar på alle sider) ── */
 .app-header {
-  background: #207383;
+  background: var(--cc-header);
   width: 100%;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 8px rgba(19, 23, 31, 0.12);
+  box-shadow: 0 2px 8px rgba(13, 43, 82, 0.2);
 }
 
 .app-header-inner {
@@ -94,31 +109,57 @@ button:focus-visible {
   width: 100%;
   max-width: 1100px;
   margin: 0 auto;
-  padding: 12px 16px;
-  min-height: 72px;
+  padding: 14px 16px;
+  min-height: 84px;
   gap: 16px;
 }
 
 @media (min-width: 640px) {
   .app-header-inner {
-    padding: 12px 32px;
-    min-height: 80px;
+    padding: 14px 32px;
+    min-height: 96px;
   }
 }
 
 @media (min-width: 1024px) {
   .app-header-inner {
-    padding: 14px 40px;
+    padding: 16px 40px;
+    min-height: 100px;
+  }
+}
+
+.app-header:not(.app-header--login) .app-header-inner {
+  max-width: none;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+@media (min-width: 640px) {
+  .app-header:not(.app-header--login) .app-header-inner {
+    padding-left: 28px;
+    padding-right: 28px;
   }
 }
 
 .app-header-logo-btn {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   padding: 0;
+  margin: 0;
   border: none;
   background: transparent;
   cursor: pointer;
+  line-height: 0;
+}
+
+.carecard-logo {
+  display: block;
+  flex-shrink: 0;
+}
+
+.carecard-logo--nav {
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.2));
 }
 
 .app-header-actions {
@@ -132,12 +173,12 @@ button:focus-visible {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 14px;
+  padding: 10px 16px;
   border: none;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.18);
   color: #FFFFFF;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.2;
   white-space: nowrap;
@@ -145,13 +186,13 @@ button:focus-visible {
 }
 
 .app-header-avatar {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.22);
   border: 2px solid rgba(255, 255, 255, 0.55);
   color: #FFFFFF;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -164,8 +205,8 @@ button:focus-visible {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   padding: 0;
   border: none;
   border-radius: 50%;
@@ -278,28 +319,28 @@ button:focus-visible {
 .app-home-greeting {
   margin: 0 0 4px;
   font-size: 14px;
-  color: #5A6473;
+  color: var(--cc-text-muted);
 }
 
 .app-home-name {
   margin: 0 0 4px;
   font-size: 26px;
   font-weight: 700;
-  color: #13171F;
+  color: var(--cc-text);
   line-height: 1.25;
 }
 
 .app-home-date {
   margin: 0 0 20px;
   font-size: 13px;
-  color: #8B95A5;
+  color: var(--cc-text-subtle);
 }
 
 .app-home-question {
   margin: 0 0 16px;
   font-size: 17px;
   font-weight: 600;
-  color: #13171F;
+  color: var(--cc-text);
   line-height: 1.35;
 }
 
@@ -326,11 +367,11 @@ button:focus-visible {
 .app-home-dept-card {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 14px;
   width: 100%;
-  padding: 12px 14px;
-  background: #FFFFFF;
-  border: 1px solid #E8ECEF;
+  padding: 16px 18px;
+  background: var(--cc-surface);
+  border: 1px solid var(--cc-border-light);
   border-radius: 12px;
   text-align: left;
   cursor: pointer;
@@ -338,22 +379,36 @@ button:focus-visible {
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
+.app-home-dept-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--cc-bg);
+  color: var(--cc-accent);
+  flex-shrink: 0;
+}
+
 .app-home-dept-text {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  flex: 1;
+  min-width: 0;
 }
 
 .app-home-dept-title {
   font-size: 16px;
   font-weight: 600;
-  color: #207383;
+  color: var(--cc-text);
   line-height: 1.35;
 }
 
 .app-home-dept-subtitle {
   font-size: 13px;
-  color: #5A6473;
+  color: var(--cc-text-muted);
 }
 
 /* ── Pasientkort to-kolonne felt ── */
@@ -407,7 +462,7 @@ button:focus-visible {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #C5E8EC;
+  background: var(--cc-bg);
 }
 
 .app-login-body {
@@ -427,10 +482,10 @@ button:focus-visible {
 .app-login-card {
   width: 100%;
   max-width: 440px;
-  background: #FFFFFF;
-  border: 1px solid #E8ECEF;
+  background: var(--cc-surface);
+  border: 1px solid var(--cc-border-light);
   border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(19, 23, 31, 0.08);
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
   padding: 36px 32px 32px;
 }
 
@@ -442,7 +497,8 @@ button:focus-visible {
 }
 
 .app-header--login .app-header-inner {
-  min-height: 72px;
+  min-height: 64px;
+  max-width: 1100px;
 }
 
 .app-header-inner--login {
@@ -465,8 +521,8 @@ button:focus-visible {
 
 /* ── Interaktive elementer ── */
 .cc-card-hover:hover {
-  box-shadow: 0 4px 20px rgba(19, 23, 31, 0.1);
-  border-color: #B8DDE3 !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
+  border-color: var(--cc-secondary) !important;
 }
 
 .cc-card-hover:active {
@@ -474,23 +530,24 @@ button:focus-visible {
 }
 
 .cc-btn-primary:hover:not(:disabled) {
-  background-color: #1A6574 !important;
+  background-color: var(--cc-accent-hover) !important;
 }
 
 .cc-btn-primary:active:not(:disabled) {
-  background-color: #185A67 !important;
+  background-color: var(--cc-accent-active) !important;
 }
 
 .cc-btn-secondary:hover:not(:disabled) {
-  background-color: #F0F7F8 !important;
-  border-color: #207383 !important;
+  background-color: var(--cc-bg) !important;
+  border-color: var(--cc-secondary) !important;
+  color: var(--cc-secondary) !important;
 }
 
 .cc-filter-btn:hover:not(:disabled) {
-  border-color: #207383 !important;
+  border-color: var(--cc-secondary) !important;
 }
 
 .cc-input:focus {
-  border-color: #207383 !important;
-  box-shadow: 0 0 0 3px rgba(32, 115, 131, 0.15);
+  border-color: var(--cc-accent) !important;
+  box-shadow: 0 0 0 3px rgba(13, 43, 82, 0.15);
 }

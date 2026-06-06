@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 128" role="img" aria-label="CareCard">
+  <rect width="320" height="128" rx="18" fill="#185A67"/>
+  <g fill="#FFFFFF" font-family="'Manrope', Arial, sans-serif" text-anchor="middle">
+    <text x="64" y="58" font-size="28" font-weight="700">C</text>
+    <text x="64" y="98" font-size="22" font-weight="400">c</text>
+    <text x="128" y="58" font-size="28" font-weight="700">A</text>
+    <text x="128" y="98" font-size="22" font-weight="400">a</text>
+    <text x="192" y="58" font-size="28" font-weight="700">R</text>
+    <text x="192" y="98" font-size="22" font-weight="400">r</text>
+    <text x="256" y="58" font-size="28" font-weight="700">E</text>
+    <text x="256" y="98" font-size="22" font-weight="400">d</text>
+  </g>
+</svg>

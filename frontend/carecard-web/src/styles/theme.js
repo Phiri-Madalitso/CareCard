@@ -1,20 +1,21 @@
-/** Felles designtokens — inspirert av rolig, tillitsvekkende helse-UI */
+/** Felles designtokens — Helsenorge-inspirert, alternativ 2 */
 
 export const colors = {
-  primary: '#207383',
-  primaryDark: '#185A67',
-  primaryHover: '#1A6574',
-  primaryLight: '#C5E8EC',
-  primaryMuted: '#B8DDE3',
-  background: '#D4EEF1',
+  header: '#0D2B52',
+  primary: '#0D2B52',
+  primaryDark: '#081E3A',
+  primaryHover: '#102d55',
+  secondary: '#2E6BFF',
+  secondaryHover: '#1d5ae6',
+  background: '#F4F8FC',
   surface: '#FFFFFF',
-  surfaceSoft: '#F8FAFB',
-  text: '#13171F',
-  textMuted: '#5A6473',
-  textSubtle: '#8B95A5',
-  border: '#D5DDE3',
-  borderLight: '#E8ECEF',
-  link: '#185FA5',
+  surfaceSoft: '#EEF4FA',
+  text: '#0F172A',
+  textMuted: '#64748B',
+  textSubtle: '#94A3B8',
+  border: '#E2E8F0',
+  borderLight: '#E8EEF4',
+  link: '#2E6BFF',
   alertRedBg: '#FCEBEB',
   alertRedText: '#A32D2D',
   alertYellowBg: '#FAEEDA',
@@ -43,9 +44,9 @@ export const typography = {
 };
 
 export const shadows = {
-  sm: '0 1px 3px rgba(19, 23, 31, 0.06)',
-  card: '0 2px 12px rgba(19, 23, 31, 0.07)',
-  elevated: '0 8px 32px rgba(19, 23, 31, 0.1)',
+  sm: '0 1px 3px rgba(15, 23, 42, 0.06)',
+  card: '0 2px 12px rgba(15, 23, 42, 0.06)',
+  elevated: '0 8px 32px rgba(15, 23, 42, 0.08)',
 };
 
 export const radii = {

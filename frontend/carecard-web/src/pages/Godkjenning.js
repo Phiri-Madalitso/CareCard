@@ -125,7 +125,7 @@ function Godkjenning() {
         <div style={topBar}>
           <IconChevronLeft
             size={22}
-            color="#185FA5"
+            color="#2E6BFF"
             onClick={() => navigate(-1)}
             style={{ cursor: 'pointer' }}
           />

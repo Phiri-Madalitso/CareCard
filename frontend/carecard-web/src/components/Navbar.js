@@ -55,7 +55,7 @@ function Navbar() {
           onClick={() => navigate('/avdelingsvalg')}
           aria-label="CareCard"
         >
-          <CareCardLogo size="nav" />
+          <CareCardLogo size="nav" variant="nav" />
         </button>
 
         <div className="app-header-actions">
@@ -66,14 +66,14 @@ function Navbar() {
               onClick={() => navigate('/godkjenning')}
               aria-label={t.varsler}
             >
-              <IconBell size={24} stroke={1.75} color="#FFFFFF" />
+              <IconBell size={26} stroke={1.75} color="#FFFFFF" />
               {antallVentende > 0 && (
                 <span className="app-header-notify-badge">{antallVentende}</span>
               )}
             </button>
           )}
           <button type="button" className="app-header-logout" onClick={handleLoggUt}>
-            <IconLogout size={16} stroke={2} color="#FFFFFF" />
+            <IconLogout size={18} stroke={2} color="#FFFFFF" />
             <span>{t.loggUt}</span>
           </button>
           <div className="app-header-avatar" aria-hidden="true">
