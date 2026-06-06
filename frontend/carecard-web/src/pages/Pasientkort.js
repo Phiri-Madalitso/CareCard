@@ -196,7 +196,7 @@ function Pasientkort() {
     } finally {
       setOversetterInnhold(false);
     }
-  }, []);
+  }, [t.kunneIkkeOversette]);
 
   useEffect(() => {
     if (!pasient?.id) {
