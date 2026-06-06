@@ -1,58 +1,27 @@
 import React from 'react';
 
 const sizes = {
-  sm: { width: 80, height: 52, topFont: 12, bottomFont: 10, radius: 8, letterSpacing: 4 },
-  header: { width: 68, height: 42, topFont: 10, bottomFont: 8, radius: 6, letterSpacing: 3 },
-  nav: { width: 132, height: 84, topFont: 18, bottomFont: 14, radius: 10, letterSpacing: 5 },
-  md: { width: 120, height: 76, topFont: 16, bottomFont: 13, radius: 10, letterSpacing: 6 },
-  lg: { width: 160, height: 100, topFont: 22, bottomFont: 17, radius: 12, letterSpacing: 8 },
+  sm: { height: 52 },
+  header: { height: 44 },
+  nav: { height: 92 },
+  md: { height: 76 },
+  lg: { height: 100 },
 };
 
-function CareCardLogo({ size = 'md', variant = 'default' }) {
+function CareCardLogo({ size = 'md' }) {
   const s = sizes[size] || sizes.md;
-  const onDark = variant === 'onDark';
 
   return (
-    <div
+    <img
+      src={`${process.env.PUBLIC_URL}/carecard-logo.png`}
+      alt="CareCard"
       style={{
-        width: s.width,
         height: s.height,
-        backgroundColor: onDark ? 'rgba(255, 255, 255, 0.12)' : '#207383',
-        border: onDark ? '1px solid rgba(255, 255, 255, 0.35)' : 'none',
-        borderRadius: s.radius,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 2,
+        width: 'auto',
+        display: 'block',
         flexShrink: 0,
       }}
-    >
-      <div
-        style={{
-          color: '#fff',
-          fontWeight: 700,
-          fontSize: s.topFont,
-          letterSpacing: s.letterSpacing,
-          fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
-          lineHeight: 1.2,
-        }}
-      >
-        C&nbsp;&nbsp;A&nbsp;&nbsp;R&nbsp;&nbsp;E
-      </div>
-      <div
-        style={{
-          color: '#fff',
-          fontWeight: 400,
-          fontSize: s.bottomFont,
-          letterSpacing: s.letterSpacing,
-          fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
-          lineHeight: 1.2,
-        }}
-      >
-        c&nbsp;&nbsp;a&nbsp;&nbsp;r&nbsp;&nbsp;d
-      </div>
-    </div>
+    />
   );
 }
 

@@ -8,7 +8,6 @@ import {
   colors,
   spacing,
   typography,
-  shadows,
   radii,
   inputBase,
   btnPrimary,
@@ -153,14 +152,14 @@ function Login() {
           <div className="app-login-lang" ref={språkMenyRef}>
             <button
               type="button"
-              style={styles.språkKnapp}
+              className="app-header-lang-btn"
               onClick={() => setSpråkMenyÅpen(!språkMenyÅpen)}
               aria-expanded={språkMenyÅpen}
               aria-haspopup="listbox"
             >
               <SpråkFlagg kode={valgtSpråk.flagKode} />
               <span>{valgtSpråk.navn}</span>
-              <IconChevronDown size={16} color="#6B7280" />
+              <IconChevronDown size={16} color="#FFFFFF" />
             </button>
             {språkMenyÅpen && (
               <div style={styles.språkMeny} role="listbox">
@@ -289,20 +288,6 @@ const styles = {
     textAlign: 'center',
     lineHeight: 1.5,
     maxWidth: 300,
-  },
-  språkKnapp: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    border: `1px solid ${colors.border}`,
-    borderRadius: radii.sm,
-    padding: '6px 12px',
-    fontSize: 13,
-    color: colors.text,
-    background: colors.surface,
-    cursor: 'pointer',
-    fontFamily: typography.fontFamily,
-    boxShadow: shadows.sm,
   },
   språkFlaggImg: {
     display: 'block',

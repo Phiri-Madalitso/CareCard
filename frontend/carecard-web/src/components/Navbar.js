@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IconBell } from '@tabler/icons-react';
+import { IconBell, IconLogout } from '@tabler/icons-react';
 import CareCardLogo from './CareCardLogo';
-import { useSpråk } from '../hooks/useSprak';
+import { useSpråk, getInitialer } from '../hooks/useSprak';
+import { loggUt } from '../services/authService';
 import { hentVentendeForslag } from '../services/profilService';
-import { colors, spacing, typography } from '../styles/theme';
 
 function Navbar() {
   const navigate = useNavigate();
   const { t } = useSpråk();
+  const brukerNavn = localStorage.getItem('navn') || 'Bruker';
   const rolle = localStorage.getItem('rolle');
   const skalViseVarsler = rolle === 'sykepleier' || rolle === 'leder';
   const [antallVentende, setAntallVentende] = useState(0);
@@ -40,80 +41,48 @@ function Navbar() {
     };
   }, [skalViseVarsler]);
 
+  const handleLoggUt = () => {
+    loggUt();
+    navigate('/');
+  };
+
   return (
     <header className="app-header">
       <div className="app-header-inner">
-        <CareCardLogo size="nav" />
+        <button
+          type="button"
+          className="app-header-logo-btn"
+          onClick={() => navigate('/avdelingsvalg')}
+          aria-label="CareCard"
+        >
+          <CareCardLogo size="nav" />
+        </button>
 
-        {skalViseVarsler ? (
-          <button
-            type="button"
-            style={styles.varslerKnapp}
-            onClick={() => navigate('/godkjenning')}
-            aria-label={t.varsler}
-          >
-            <div style={styles.varslerIkonWrap}>
-              <IconBell size={26} stroke={1.75} color={colors.text} />
+        <div className="app-header-actions">
+          {skalViseVarsler && (
+            <button
+              type="button"
+              className="app-header-notify"
+              onClick={() => navigate('/godkjenning')}
+              aria-label={t.varsler}
+            >
+              <IconBell size={24} stroke={1.75} color="#FFFFFF" />
               {antallVentende > 0 && (
-                <div style={styles.badge}>
-                  {antallVentende}
-                </div>
+                <span className="app-header-notify-badge">{antallVentende}</span>
               )}
-            </div>
-            <span style={styles.varslerLabel}>{t.varsler}</span>
+            </button>
+          )}
+          <button type="button" className="app-header-logout" onClick={handleLoggUt}>
+            <IconLogout size={16} stroke={2} color="#FFFFFF" />
+            <span>{t.loggUt}</span>
           </button>
-        ) : (
-          <div style={{ width: 48 }} aria-hidden="true" />
-        )}
+          <div className="app-header-avatar" aria-hidden="true">
+            {getInitialer(brukerNavn)}
+          </div>
+        </div>
       </div>
     </header>
   );
 }
-
-const styles = {
-  varslerKnapp: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: spacing.xs,
-    background: 'transparent',
-    border: 'none',
-    cursor: 'pointer',
-    padding: `${spacing.xs}px ${spacing.sm}px`,
-    borderRadius: 12,
-    fontFamily: typography.fontFamily,
-    marginLeft: 'auto',
-  },
-  varslerIkonWrap: {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 36,
-    height: 36,
-  },
-  varslerLabel: {
-    fontSize: 13,
-    fontWeight: 600,
-    color: colors.text,
-  },
-  badge: {
-    position: 'absolute',
-    top: -4,
-    right: -8,
-    background: colors.alertRedText,
-    color: '#fff',
-    fontSize: 11,
-    fontWeight: 700,
-    minWidth: 20,
-    height: 20,
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '0 5px',
-    boxSizing: 'border-box',
-  },
-};
 
 export default Navbar;
