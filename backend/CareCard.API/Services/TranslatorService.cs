@@ -26,14 +26,71 @@ public class TranslatorService
     }
 
     public bool ErKonfigurert =>
-        !string.IsNullOrWhiteSpace(_configuration["Translator:Key"]);
+        !string.IsNullOrWhiteSpace(_configuration["Translator:Key"]?.Trim());
+
+    public async Task<TranslatorStatus> HentStatus()
+    {
+        var key = _configuration["Translator:Key"]?.Trim();
+        var region = _configuration["Translator:Region"]?.Trim().ToLowerInvariant();
+        var endpoint = (_configuration["Translator:Endpoint"]
+            ?? "https://api.cognitive.microsofttranslator.com/").Trim();
+
+        var status = new TranslatorStatus
+        {
+            Konfigurert = !string.IsNullOrWhiteSpace(key),
+            NokkelLengde = key?.Length ?? 0,
+            Region = string.IsNullOrWhiteSpace(region) ? null : region,
+            Endpoint = endpoint,
+        };
+
+        if (!status.Konfigurert)
+        {
+            status.Fungerer = false;
+            status.Feil = "Translator:Key mangler.";
+            return status;
+        }
+
+        if (string.IsNullOrWhiteSpace(region))
+        {
+            status.Fungerer = false;
+            status.Feil = "Translator:Region mangler. Sett f.eks. swedencentral.";
+            return status;
+        }
+
+        try
+        {
+            var resultat = await SendTranslateRequest(
+                new[] { "hello" },
+                toLang: "nb",
+                fromLang: "en",
+                fallbackToOriginal: false);
+
+            var oversatt = resultat[0].TranslatedText;
+            if (string.IsNullOrWhiteSpace(oversatt) || oversatt.Equals("hello", StringComparison.OrdinalIgnoreCase))
+            {
+                status.Fungerer = false;
+                status.Feil = "Azure svarte, men uten oversettelse. Sjekk Key, Region og Endpoint.";
+                return status;
+            }
+
+            status.Fungerer = true;
+            status.TestOversatt = oversatt;
+            return status;
+        }
+        catch (Exception ex)
+        {
+            status.Fungerer = false;
+            status.Feil = ex.Message;
+            return status;
+        }
+    }
 
     public async Task<string?> TranslaterTilNorsk(string tekst, string? kildeSprak = null)
     {
         if (string.IsNullOrWhiteSpace(tekst))
             return null;
 
-        if (string.IsNullOrWhiteSpace(_configuration["Translator:Key"]))
+        if (string.IsNullOrWhiteSpace(_configuration["Translator:Key"]?.Trim()))
         {
             _logger.LogWarning("Translator:Key is not configured — skipping translation.");
             return null;
@@ -130,10 +187,10 @@ public class TranslatorService
         if (toTranslate.Count == 0)
             return results;
 
-        var key = _configuration["Translator:Key"];
-        var endpoint = _configuration["Translator:Endpoint"]
-            ?? "https://api.cognitive.microsofttranslator.com/";
-        var region = _configuration["Translator:Region"];
+        var key = _configuration["Translator:Key"]?.Trim();
+        var endpoint = (_configuration["Translator:Endpoint"]
+            ?? "https://api.cognitive.microsofttranslator.com/").Trim();
+        var region = _configuration["Translator:Region"]?.Trim().ToLowerInvariant();
 
         if (string.IsNullOrWhiteSpace(key))
         {
@@ -197,6 +254,10 @@ public class TranslatorService
                 for (var i = 0; i < tekster.Count; i++)
                     results[i] = new TranslateResult { TranslatedText = tekster[i] };
             }
+            else
+            {
+                throw;
+            }
         }
 
         return results;
@@ -254,4 +315,15 @@ public class TranslatorService
         [JsonPropertyName("text")]
         public string Text { get; set; } = string.Empty;
     }
+}
+
+public sealed class TranslatorStatus
+{
+    public bool Konfigurert { get; set; }
+    public bool Fungerer { get; set; }
+    public int NokkelLengde { get; set; }
+    public string? Region { get; set; }
+    public string? Endpoint { get; set; }
+    public string? TestOversatt { get; set; }
+    public string? Feil { get; set; }
 }

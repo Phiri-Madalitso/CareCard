@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using CareCard.API.Data;
 using CareCard.API.Models;
 using CareCard.API.Services;
@@ -15,11 +15,16 @@ namespace CareCard.API.Controllers
     {
         private readonly CareCardDbContext _context;
         private readonly TranslatorService _translator;
+        private readonly ILogger<EndringsForslagController> _logger;
 
-        public EndringsForslagController(CareCardDbContext context, TranslatorService translator)
+        public EndringsForslagController(
+            CareCardDbContext context,
+            TranslatorService translator,
+            ILogger<EndringsForslagController> logger)
         {
             _context = context;
             _translator = translator;
+            _logger = logger;
         }
 
         [HttpGet("venter")]
@@ -63,6 +68,16 @@ namespace CareCard.API.Controllers
             forslag.NyVerdiOversatt = await _translator.TranslaterTilNorsk(
                 forslag.NyVerdi,
                 forslag.KildeSprak);
+
+            if (string.IsNullOrWhiteSpace(forslag.NyVerdiOversatt)
+                && !string.IsNullOrWhiteSpace(forslag.NyVerdi))
+            {
+                _logger.LogWarning(
+                    "Endringsforslag lagret uten norsk oversettelse. Translator konfigurert: {Konfigurert}, tekstlengde: {Length}, kildeSprak: {KildeSprak}",
+                    _translator.ErKonfigurert,
+                    forslag.NyVerdi.Length,
+                    forslag.KildeSprak ?? "(ikke oppgitt)");
+            }
 
             _context.EndringsForslag.Add(forslag);
             await _context.SaveChangesAsync();

@@ -17,6 +17,13 @@ public class OversettController : ControllerBase
         _translator = translator;
     }
 
+    /// <summary>Sjekk om Azure Translator er konfigurert (f.eks. etter deploy til App Service).</summary>
+    [HttpGet("status")]
+    public async Task<ActionResult<TranslatorStatus>> Status()
+    {
+        return Ok(await _translator.HentStatus());
+    }
+
     [HttpPost]
     public async Task<ActionResult<OversettResponse>> Oversett(OversettRequest request)
     {
