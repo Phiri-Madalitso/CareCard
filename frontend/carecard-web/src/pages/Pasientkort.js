@@ -19,6 +19,17 @@ import {
   oversettTekster,
 } from '../services/profilService';
 import { getAnsattId } from '../services/apiClient';
+import {
+  colors,
+  spacing,
+  typography,
+  pageShell,
+  pageContent,
+  card,
+  radii,
+  topBar,
+  shadows,
+} from '../styles/theme';
 
 const FELT_KONFIG = {
   fortykningsbehov: { profilType: 'Matprofil', apiFelt: 'KonsistensDrikke', kilde: 'mat', felt: 'konsistensDrikke' },
@@ -311,29 +322,24 @@ function Pasientkort() {
 
   if (!pasient) {
     return (
-      <>
+      <div style={pageShell}>
         <Navbar />
         <div style={styles.page}>
           <p style={styles.feilTekst}>{t.ingenPasientValgt}</p>
-          <button type="button" style={styles.suggestButton} onClick={() => navigate(-1)}>
+          <button type="button" className="cc-btn-secondary" style={styles.suggestButton} onClick={() => navigate(-1)}>
             {t.tilbake}
           </button>
         </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div style={pageShell}>
       <Navbar />
       <div style={styles.page}>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap"
-          rel="stylesheet"
-        />
-
-        <div style={styles.topbar}>
-          <button style={styles.iconButton} onClick={() => navigate(-1)}>
+        <div style={topBar}>
+          <button type="button" style={styles.iconButton} onClick={() => navigate(-1)}>
             <IconChevronLeft size={22} color="#13171F" />
           </button>
           <span style={styles.topbarTitle}>{t.pasientkort}</span>
@@ -635,252 +641,246 @@ function Pasientkort() {
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }
 
 const styles = {
   page: {
-    fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
-    maxWidth: 480,
-    margin: '0 auto',
-    padding: '24px 24px 24px',
-    minHeight: '100vh',
-    boxSizing: 'border-box',
-    backgroundColor: '#fff',
-  },
-  topbar: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 24,
+    ...pageContent,
+    paddingTop: spacing.md,
   },
   iconButton: {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    padding: 0,
+    padding: spacing.xs,
     display: 'flex',
     alignItems: 'center',
+    borderRadius: radii.sm,
   },
   topbarTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: 600,
-    color: '#13171F',
+    color: colors.text,
   },
   profileHeader: {
     display: 'flex',
     alignItems: 'center',
-    gap: 14,
-    marginBottom: 14,
+    gap: spacing.md,
+    marginBottom: spacing.md,
   },
   avatar: {
-    width: 52,
-    height: 52,
+    width: 56,
+    height: 56,
     borderRadius: '50%',
-    backgroundColor: '#185FA5',
+    backgroundColor: colors.link,
     color: '#fff',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: 700,
     flexShrink: 0,
   },
   patientName: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 700,
-    color: '#13171F',
+    color: colors.text,
     margin: 0,
+    lineHeight: 1.3,
   },
   patientMeta: {
-    fontSize: 14,
-    color: '#6B7280',
-    margin: '4px 0 0',
+    fontSize: 15,
+    color: colors.textMuted,
+    margin: `${spacing.xs}px 0 0`,
   },
   alertBadges: {
     display: 'flex',
     flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 20,
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
   },
   allergiBadge: {
     display: 'inline-flex',
     alignItems: 'center',
     gap: 4,
-    fontSize: 12,
-    fontWeight: 500,
-    padding: '4px 10px',
-    borderRadius: 6,
-    backgroundColor: '#FCEBEB',
-    color: '#A32D2D',
+    fontSize: 13,
+    fontWeight: 600,
+    padding: '6px 12px',
+    borderRadius: radii.sm,
+    backgroundColor: colors.alertRedBg,
+    color: colors.alertRedText,
     border: '1px solid #F5C6C6',
   },
   warningBadge: {
     display: 'inline-flex',
     alignItems: 'center',
     gap: 4,
-    fontSize: 12,
-    fontWeight: 500,
-    padding: '4px 10px',
-    borderRadius: 6,
-    backgroundColor: '#FAEEDA',
-    color: '#854F0B',
+    fontSize: 13,
+    fontWeight: 600,
+    padding: '6px 12px',
+    borderRadius: radii.sm,
+    backgroundColor: colors.alertYellowBg,
+    color: colors.alertYellowText,
     border: '1px solid #F0D9A8',
   },
   tabContainer: {
     display: 'flex',
-    backgroundColor: '#F3F4F6',
-    borderRadius: 10,
-    padding: 4,
-    marginBottom: 20,
+    backgroundColor: colors.borderLight,
+    borderRadius: radii.md,
+    padding: 5,
+    marginBottom: spacing.lg,
   },
   tab: {
     flex: 1,
-    padding: '10px 16px',
+    padding: `${spacing.sm}px ${spacing.md}px`,
     border: 'none',
-    borderRadius: 8,
-    fontSize: 14,
+    borderRadius: radii.sm,
+    fontSize: 15,
     fontWeight: 600,
     cursor: 'pointer',
     backgroundColor: 'transparent',
-    color: '#6B7280',
-    fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
+    color: colors.textMuted,
+    fontFamily: typography.fontFamily,
   },
   tabActive: {
-    backgroundColor: '#fff',
-    color: '#185FA5',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+    backgroundColor: colors.surface,
+    color: colors.link,
+    boxShadow: shadows.sm,
   },
   tabContent: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 10,
+    gap: spacing.md,
   },
   sectionBox: {
-    padding: '14px 16px',
-    borderRadius: 12,
+    padding: `${spacing.lg}px ${spacing.lg}px`,
+    borderRadius: radii.lg,
     border: '1px solid',
   },
   sectionTitle: {
     display: 'flex',
     alignItems: 'center',
-    gap: 6,
-    fontSize: 14,
+    gap: spacing.sm,
+    fontSize: 15,
     fontWeight: 600,
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   bulletList: {
     margin: 0,
-    paddingLeft: 18,
-    fontSize: 14,
-    lineHeight: 1.6,
-    color: '#A32D2D',
+    paddingLeft: 20,
+    fontSize: 15,
+    lineHeight: 1.65,
+    color: colors.alertRedText,
   },
   grid: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
-    gap: 10,
+    gap: spacing.md,
   },
   lastChanged: {
     display: 'flex',
     alignItems: 'center',
-    gap: 6,
-    fontSize: 13,
-    color: '#6B7280',
-    marginTop: 6,
+    gap: spacing.sm,
+    fontSize: 14,
+    color: colors.textMuted,
+    marginTop: spacing.sm,
   },
   suggestButton: {
     width: '100%',
-    padding: '12px 24px',
-    fontSize: 15,
+    padding: `${spacing.md}px ${spacing.lg}px`,
+    fontSize: 16,
     fontWeight: 600,
-    color: '#185FA5',
-    backgroundColor: '#fff',
-    border: '1px solid #185FA5',
-    borderRadius: 8,
+    color: colors.link,
+    backgroundColor: colors.surface,
+    border: `1px solid ${colors.link}`,
+    borderRadius: radii.md,
     cursor: 'pointer',
-    fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
-    marginTop: 4,
+    fontFamily: typography.fontFamily,
+    marginTop: spacing.sm,
+    transition: 'background-color 0.15s ease, border-color 0.15s ease',
   },
   kort: {
-    padding: '14px 16px',
-    backgroundColor: '#F9FAFB',
-    border: '1px solid #E5E7EB',
-    borderRadius: 12,
+    ...card,
+    padding: `${spacing.lg}px ${spacing.lg}px`,
+    boxShadow: 'none',
   },
   kortLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: 600,
-    color: '#6B7280',
+    color: colors.textMuted,
     margin: 0,
+    letterSpacing: '0.02em',
   },
   kortText: {
     margin: 0,
-    fontSize: 14,
-    lineHeight: 1.5,
-    color: '#13171F',
+    fontSize: 15,
+    lineHeight: 1.6,
+    color: colors.text,
   },
   tekstfelt: {
     width: '100%',
-    padding: '10px 12px',
-    borderRadius: '10px',
-    border: '1px solid #185FA5',
-    fontSize: '14px',
-    color: '#13171F',
-    fontFamily: 'Manrope, sans-serif',
+    padding: `${spacing.md}px ${spacing.lg}px`,
+    borderRadius: radii.md,
+    border: `1px solid ${colors.link}`,
+    fontSize: 15,
+    color: colors.text,
+    fontFamily: typography.fontFamily,
     outline: 'none',
     resize: 'none',
     boxSizing: 'border-box',
-    background: '#F9FAFB',
+    background: colors.surfaceSoft,
+    lineHeight: 1.5,
   },
   avbrytKnapp: {
     flex: 1,
-    padding: '8px',
-    borderRadius: '10px',
-    border: '1px solid #E5E7EB',
-    background: '#F9FAFB',
-    fontSize: '13px',
-    fontWeight: '500',
-    color: '#6B7280',
+    padding: `${spacing.sm}px`,
+    borderRadius: radii.md,
+    border: `1px solid ${colors.border}`,
+    background: colors.surfaceSoft,
+    fontSize: 14,
+    fontWeight: 500,
+    color: colors.textMuted,
     cursor: 'pointer',
-    fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
+    fontFamily: typography.fontFamily,
   },
   sendKnapp: {
     flex: 2,
-    padding: '8px',
-    borderRadius: '10px',
+    padding: `${spacing.sm}px`,
+    borderRadius: radii.md,
     border: 'none',
-    background: '#185FA5',
-    fontSize: '13px',
-    fontWeight: '600',
+    background: colors.link,
+    fontSize: 14,
+    fontWeight: 600,
     color: '#fff',
     cursor: 'pointer',
-    fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
+    fontFamily: typography.fontFamily,
   },
   toast: {
     position: 'fixed',
-    bottom: '32px',
+    bottom: spacing.xl,
     left: '50%',
     transform: 'translateX(-50%)',
-    background: '#13171F',
+    background: colors.text,
     color: '#fff',
-    padding: '12px 24px',
-    borderRadius: '12px',
-    fontSize: '14px',
-    fontWeight: '500',
+    padding: `${spacing.md}px ${spacing.lg}px`,
+    borderRadius: radii.lg,
+    fontSize: 15,
+    fontWeight: 500,
     zIndex: 1000,
-    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+    boxShadow: shadows.elevated,
   },
   feilTekst: {
-    color: '#A32D2D',
-    fontSize: 14,
-    marginBottom: 12,
+    color: colors.alertRedText,
+    fontSize: 15,
+    marginBottom: spacing.md,
+    lineHeight: 1.5,
   },
   lasterTekst: {
-    color: '#6B7280',
-    fontSize: 14,
-    marginBottom: 12,
+    color: colors.textMuted,
+    fontSize: 15,
+    marginBottom: spacing.md,
   },
 };
 

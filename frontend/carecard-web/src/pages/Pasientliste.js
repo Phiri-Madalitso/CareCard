@@ -4,6 +4,16 @@ import { IconChevronLeft, IconSearch } from '@tabler/icons-react';
 import Navbar from '../components/Navbar';
 import { useSpråk } from '../hooks/useSprak';
 import { hentPasienter } from '../services/pasientService';
+import {
+  colors,
+  spacing,
+  typography,
+  pageShell,
+  pageContent,
+  cardInteractive,
+  radii,
+  topBar,
+} from '../styles/theme';
 
 const AVATAR_COLORS = ['#185FA5', '#0F6E56', '#993556', '#534AB7', '#854F0B'];
 
@@ -91,37 +101,32 @@ function Pasientliste() {
 
   if (laster) {
     return (
-      <>
+      <div style={pageShell}>
         <Navbar />
         <div style={styles.page}>
           <p style={styles.statusText}>Laster pasienter...</p>
         </div>
-      </>
+      </div>
     );
   }
 
   if (feil) {
     return (
-      <>
+      <div style={pageShell}>
         <Navbar />
         <div style={styles.page}>
           <p style={styles.errorText}>{feil}</p>
         </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div style={pageShell}>
       <Navbar />
       <div style={styles.page}>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap"
-          rel="stylesheet"
-        />
-
-        <div style={styles.topbar}>
-        <button style={styles.backButton} onClick={() => navigate(-1)}>
+        <div style={topBar}>
+        <button type="button" style={styles.backButton} onClick={() => navigate(-1)}>
           <IconChevronLeft size={22} color="#13171F" />
         </button>
         <span style={styles.topbarTitle}>{avdeling.navn}</span>
@@ -140,6 +145,7 @@ function Pasientliste() {
           placeholder={t.søkPåNavn}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          className="cc-input"
           style={styles.searchInput}
         />
       </div>
@@ -154,6 +160,8 @@ function Pasientliste() {
           return (
             <button
               key={f.key}
+              type="button"
+              className="cc-filter-btn"
               style={{
                 ...styles.filterButton,
                 backgroundColor: isActive ? '#13171F' : '#F9FAFB',
@@ -178,6 +186,8 @@ function Pasientliste() {
         {filtered.map((p, index) => (
           <button
             key={p.id}
+            type="button"
+            className="cc-card-hover"
             style={styles.patientCard}
             onClick={() => navigate(`/pasient/${p.id}`, { state: { pasient: p, avdeling } })}
           >
@@ -208,94 +218,86 @@ function Pasientliste() {
           {filtered.length} {t.aktivePasienter}
         </p>
       </div>
-    </>
+    </div>
   );
 }
 
 const styles = {
   page: {
-    fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
-    maxWidth: 480,
-    margin: '0 auto',
-    padding: '24px 24px 24px',
-    minHeight: '100vh',
-    boxSizing: 'border-box',
-    backgroundColor: '#fff',
-  },
-  topbar: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 24,
+    ...pageContent,
+    paddingTop: spacing.md,
   },
   backButton: {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    padding: 0,
+    padding: spacing.xs,
     display: 'flex',
     alignItems: 'center',
+    borderRadius: radii.sm,
   },
   topbarTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: 600,
-    color: '#13171F',
+    color: colors.text,
   },
   titleRow: {
     display: 'flex',
     alignItems: 'baseline',
-    gap: 10,
-    marginBottom: 16,
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 700,
-    color: '#13171F',
+    color: colors.text,
     margin: 0,
+    lineHeight: 1.25,
   },
   subtitle: {
-    fontSize: 14,
-    color: '#6B7280',
+    fontSize: 15,
+    color: colors.textMuted,
   },
   searchWrapper: {
     position: 'relative',
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   searchIcon: {
     position: 'absolute',
-    left: 14,
+    left: 16,
     top: '50%',
     transform: 'translateY(-50%)',
     pointerEvents: 'none',
   },
   searchInput: {
     width: '100%',
-    padding: '12px 14px 12px 42px',
-    fontSize: 15,
-    border: '1px solid #E5E7EB',
-    borderRadius: 8,
-    backgroundColor: '#F9FAFB',
-    color: '#13171F',
-    fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
+    padding: '14px 16px 14px 44px',
+    fontSize: 16,
+    border: `1px solid ${colors.border}`,
+    borderRadius: radii.md,
+    backgroundColor: colors.surface,
+    color: colors.text,
+    fontFamily: typography.fontFamily,
     boxSizing: 'border-box',
     outline: 'none',
   },
   filterRow: {
     display: 'flex',
     flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 16,
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
   },
   filterButton: {
     display: 'flex',
     alignItems: 'center',
-    gap: 6,
-    padding: '8px 12px',
-    borderRadius: 20,
-    fontSize: 13,
+    gap: spacing.sm,
+    padding: '10px 16px',
+    borderRadius: radii.pill,
+    fontSize: 14,
     fontWeight: 500,
     cursor: 'pointer',
-    fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
+    fontFamily: typography.fontFamily,
+    transition: 'border-color 0.15s ease',
   },
   filterDot: {
     width: 8,
@@ -306,88 +308,86 @@ const styles = {
   patientList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 10,
+    gap: spacing.md,
   },
   patientCard: {
+    ...cardInteractive,
     display: 'flex',
     alignItems: 'flex-start',
-    gap: 14,
-    padding: '14px 16px',
-    backgroundColor: '#F9FAFB',
-    border: '1px solid #E5E7EB',
-    borderRadius: 12,
-    cursor: 'pointer',
+    gap: spacing.md,
+    padding: `${spacing.lg}px ${spacing.lg}px`,
     textAlign: 'left',
     width: '100%',
-    fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
+    fontFamily: typography.fontFamily,
   },
   patientAvatar: {
-    width: 44,
-    height: 44,
+    width: 48,
+    height: 48,
     borderRadius: '50%',
     color: '#fff',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: 700,
     flexShrink: 0,
   },
   patientInfo: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 4,
+    gap: spacing.xs,
     flex: 1,
   },
   patientName: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: 600,
-    color: '#13171F',
+    color: colors.text,
+    lineHeight: 1.35,
   },
   patientRoom: {
-    fontSize: 13,
-    color: '#6B7280',
+    fontSize: 14,
+    color: colors.textMuted,
   },
   badgeRow: {
     display: 'flex',
     flexWrap: 'wrap',
-    gap: 6,
-    marginTop: 4,
+    gap: spacing.sm,
+    marginTop: spacing.xs,
   },
   allergiBadge: {
     fontSize: 12,
-    fontWeight: 500,
-    padding: '2px 8px',
-    borderRadius: 4,
-    backgroundColor: '#FCEBEB',
-    color: '#A32D2D',
+    fontWeight: 600,
+    padding: '4px 10px',
+    borderRadius: radii.sm,
+    backgroundColor: colors.alertRedBg,
+    color: colors.alertRedText,
   },
   warningBadge: {
     fontSize: 12,
-    fontWeight: 500,
-    padding: '2px 8px',
-    borderRadius: 4,
-    backgroundColor: '#FAEEDA',
-    color: '#854F0B',
+    fontWeight: 600,
+    padding: '4px 10px',
+    borderRadius: radii.sm,
+    backgroundColor: colors.alertYellowBg,
+    color: colors.alertYellowText,
   },
   countText: {
-    marginTop: 20,
-    fontSize: 13,
-    color: '#6B7280',
+    marginTop: spacing.lg,
+    fontSize: 14,
+    color: colors.textMuted,
     textAlign: 'center',
   },
   statusText: {
-    marginTop: 40,
-    fontSize: 15,
-    color: '#6B7280',
+    marginTop: spacing.xxl,
+    fontSize: 16,
+    color: colors.textMuted,
     textAlign: 'center',
   },
   errorText: {
-    marginTop: 40,
-    fontSize: 15,
-    color: '#A32D2D',
+    marginTop: spacing.xxl,
+    fontSize: 16,
+    color: colors.alertRedText,
     textAlign: 'center',
-    lineHeight: 1.5,
+    lineHeight: 1.6,
   },
 };
 

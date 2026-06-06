@@ -4,6 +4,7 @@ import { IconBell } from '@tabler/icons-react';
 import CareCardLogo from './CareCardLogo';
 import { useSpråk } from '../hooks/useSprak';
 import { hentVentendeForslag } from '../services/profilService';
+import { colors, layout, spacing, typography, shadows } from '../styles/theme';
 
 function Navbar() {
   const navigate = useNavigate();
@@ -40,81 +41,93 @@ function Navbar() {
   }, [skalViseVarsler]);
 
   return (
-    <div style={styles.navbar}>
-      <CareCardLogo size="sm" />
+    <header style={styles.outer}>
+      <div style={styles.inner}>
+        <CareCardLogo size="sm" />
 
-      {skalViseVarsler && (
-        <button
-          type="button"
-          style={styles.varslerKnapp}
-          onClick={() => navigate('/godkjenning')}
-        >
-          <div style={styles.varslerIkonWrap}>
-            <IconBell size={22} stroke={1.75} color="#13171F" />
-            {antallVentende > 0 && (
-              <div style={styles.badge}>
-                {antallVentende}
-              </div>
-            )}
-          </div>
-          <span style={styles.varslerLabel}>{t.varsler}</span>
-        </button>
-      )}
-    </div>
+        {skalViseVarsler && (
+          <button
+            type="button"
+            style={styles.varslerKnapp}
+            onClick={() => navigate('/godkjenning')}
+            aria-label={t.varsler}
+          >
+            <div style={styles.varslerIkonWrap}>
+              <IconBell size={24} stroke={1.75} color={colors.text} />
+              {antallVentende > 0 && (
+                <div style={styles.badge}>
+                  {antallVentende}
+                </div>
+              )}
+            </div>
+            <span style={styles.varslerLabel}>{t.varsler}</span>
+          </button>
+        )}
+      </div>
+    </header>
   );
 }
 
 const styles = {
-  navbar: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '12px 24px',
-    borderBottom: '1px solid #E5E7EB',
-    background: '#FFFFFF',
+  outer: {
+    background: colors.surface,
+    borderBottom: `1px solid ${colors.borderLight}`,
+    boxShadow: shadows.sm,
     position: 'sticky',
     top: 0,
     zIndex: 100,
+  },
+  inner: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    maxWidth: layout.maxWidthWide,
+    margin: '0 auto',
+    padding: `${spacing.md}px ${spacing.lg}px`,
+    minHeight: layout.navbarHeight,
+    boxSizing: 'border-box',
+    fontFamily: typography.fontFamily,
   },
   varslerKnapp: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '4px',
+    gap: spacing.xs,
     background: 'transparent',
     border: 'none',
     cursor: 'pointer',
-    padding: '4px 6px',
-    fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
+    padding: `${spacing.xs}px ${spacing.sm}px`,
+    borderRadius: 12,
+    fontFamily: typography.fontFamily,
   },
   varslerIkonWrap: {
     position: 'relative',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '28px',
-    height: '28px',
+    width: 32,
+    height: 32,
   },
   varslerLabel: {
-    fontSize: '12px',
-    fontWeight: '700',
-    color: '#13171F',
+    fontSize: 13,
+    fontWeight: 600,
+    color: colors.text,
   },
   badge: {
     position: 'absolute',
-    top: '-2px',
-    right: '-6px',
-    background: '#A32D2D',
+    top: -4,
+    right: -8,
+    background: colors.alertRedText,
     color: '#fff',
-    fontSize: '11px',
-    fontWeight: '700',
-    minWidth: '18px',
-    height: '18px',
+    fontSize: 11,
+    fontWeight: 700,
+    minWidth: 20,
+    height: 20,
     borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '0 4px',
+    padding: '0 5px',
     boxSizing: 'border-box',
   },
 };

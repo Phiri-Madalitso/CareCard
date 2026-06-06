@@ -4,6 +4,16 @@ import { IconMail, IconLock, IconEye, IconEyeOff, IconAlertCircle, IconChevronDo
 import CareCardLogo from '../components/CareCardLogo';
 import { useSpråk } from '../hooks/useSprak';
 import { loggInn } from '../services/authService';
+import {
+  colors,
+  spacing,
+  typography,
+  shadows,
+  radii,
+  card,
+  inputBase,
+  btnPrimary,
+} from '../styles/theme';
 
 const MAX_FORSOK = 5;
 const LOCK_DURATION_MS = 15 * 60 * 1000;
@@ -28,14 +38,14 @@ function SpråkFlagg({ kode }) {
   );
 }
 
-const colors = {
-  teal: '#207383',
-  text: '#13171F',
-  textMuted: '#5A6473',
-  border: '#E6E8EC',
-  surfaceSoft: '#FAFAFB',
-  alertRedBg: '#FCEBEB',
-  alertRedText: '#A32D2D',
+const colorsLocal = {
+  teal: colors.primary,
+  text: colors.text,
+  textMuted: colors.textMuted,
+  border: colors.border,
+  surfaceSoft: colors.surfaceSoft,
+  alertRedBg: colors.alertRedBg,
+  alertRedText: colors.alertRedText,
 };
 
 function Login() {
@@ -139,10 +149,6 @@ function Login() {
 
   return (
     <div style={styles.page}>
-      <link
-        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap"
-        rel="stylesheet"
-      />
       <div style={styles.språkRad} ref={språkMenyRef}>
         <button
           type="button"
@@ -179,6 +185,7 @@ function Login() {
           </div>
         )}
       </div>
+      <div style={styles.loginCard}>
       <div style={styles.logoSection}>
         <CareCardLogo size="lg" />
         <p style={styles.tagline}>{t.tagline}</p>
@@ -187,7 +194,7 @@ function Login() {
       <form onSubmit={handleSubmit} style={styles.form}>
         {feilMelding && t[feilMelding] && (
           <div style={styles.errorBox}>
-            <IconAlertCircle size={18} color={colors.alertRedText} style={{ flexShrink: 0 }} />
+            <IconAlertCircle size={18} color={colorsLocal.alertRedText} style={{ flexShrink: 0 }} />
             <span>{t[feilMelding]}{feilEkstra}</span>
           </div>
         )}
@@ -195,13 +202,14 @@ function Login() {
         <div style={styles.fieldGroup}>
           <label style={styles.label}>{t.epost}</label>
           <div style={styles.inputWrapper}>
-            <IconMail size={18} color={colors.textMuted} style={styles.inputIcon} />
+            <IconMail size={18} color={colorsLocal.textMuted} style={styles.inputIcon} />
             <input
               type="email"
               value={epost}
               onChange={handleEpostChange}
               placeholder={t.epost}
               style={styles.input}
+              className="cc-input"
               disabled={lastet}
             />
           </div>
@@ -210,13 +218,14 @@ function Login() {
         <div style={styles.fieldGroup}>
           <label style={styles.label}>{t.passord}</label>
           <div style={styles.inputWrapper}>
-            <IconLock size={18} color={colors.textMuted} style={styles.inputIcon} />
+            <IconLock size={18} color={colorsLocal.textMuted} style={styles.inputIcon} />
             <input
               type={showPassword ? 'text' : 'password'}
               value={passord}
               onChange={handlePassordChange}
               placeholder={t.passord}
               style={{ ...styles.input, paddingRight: 44 }}
+              className="cc-input"
               disabled={lastet}
             />
             <button
@@ -227,9 +236,9 @@ function Login() {
               tabIndex={-1}
             >
               {showPassword ? (
-                <IconEyeOff size={18} color={colors.textMuted} />
+                <IconEyeOff size={18} color={colorsLocal.textMuted} />
               ) : (
-                <IconEye size={18} color={colors.textMuted} />
+                <IconEye size={18} color={colorsLocal.textMuted} />
               )}
             </button>
           </div>
@@ -244,6 +253,7 @@ function Login() {
         <button
           type="submit"
           disabled={lastet}
+          className="cc-btn-primary"
           style={{
             ...styles.submitButton,
             opacity: lastet ? 0.5 : 1,
@@ -253,6 +263,7 @@ function Login() {
           {lastet ? t.kontoLåst : t.loggInn}
         </button>
       </form>
+      </div>
     </div>
   );
 }
@@ -260,32 +271,42 @@ function Login() {
 const styles = {
   page: {
     position: 'relative',
-    fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
-    maxWidth: 480,
-    margin: '0 auto',
-    padding: '48px 24px 24px',
+    fontFamily: typography.fontFamily,
     minHeight: '100vh',
     boxSizing: 'border-box',
-    backgroundColor: '#fff',
+    backgroundColor: colors.primaryLight,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: `${spacing.lg}px`,
+  },
+  loginCard: {
+    ...card,
+    width: '100%',
+    maxWidth: 440,
+    padding: `${spacing.xxl}px ${spacing.xl}px ${spacing.xl}px`,
+    boxShadow: shadows.elevated,
   },
   språkRad: {
     position: 'absolute',
-    top: '24px',
-    right: '24px',
+    top: spacing.lg,
+    right: spacing.lg,
     zIndex: 10,
   },
   språkKnapp: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
-    border: '1px solid #E6E8EC',
-    borderRadius: '8px',
-    padding: '6px 10px',
-    fontSize: '13px',
-    color: '#13171F',
-    background: '#FAFAFB',
+    gap: spacing.sm,
+    border: `1px solid ${colors.border}`,
+    borderRadius: radii.md,
+    padding: '8px 14px',
+    fontSize: 14,
+    color: colors.text,
+    background: colors.surface,
     cursor: 'pointer',
-    fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
+    fontFamily: typography.fontFamily,
+    boxShadow: shadows.sm,
   },
   språkFlaggImg: {
     display: 'block',
@@ -326,39 +347,41 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: spacing.xl,
   },
   tagline: {
-    marginTop: 16,
-    fontSize: 15,
+    marginTop: spacing.md,
+    fontSize: 16,
     color: colors.textMuted,
     textAlign: 'center',
+    lineHeight: 1.5,
+    maxWidth: 320,
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 16,
+    gap: spacing.md,
   },
   errorBox: {
     display: 'flex',
     alignItems: 'flex-start',
-    gap: 10,
-    backgroundColor: colors.alertRedBg,
-    color: colors.alertRedText,
-    padding: '12px 14px',
-    borderRadius: 8,
+    gap: spacing.sm,
+    backgroundColor: colorsLocal.alertRedBg,
+    color: colorsLocal.alertRedText,
+    padding: `${spacing.sm}px ${spacing.md}px`,
+    borderRadius: radii.md,
     fontSize: 14,
-    lineHeight: 1.4,
+    lineHeight: 1.5,
   },
   fieldGroup: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 6,
+    gap: spacing.xs,
   },
   label: {
     fontSize: 14,
     fontWeight: 600,
-    color: colors.text,
+    color: colorsLocal.text,
   },
   inputWrapper: {
     position: 'relative',
@@ -371,16 +394,7 @@ const styles = {
     pointerEvents: 'none',
   },
   input: {
-    width: '100%',
-    padding: '12px 14px 12px 42px',
-    fontSize: 15,
-    border: `1px solid ${colors.border}`,
-    borderRadius: 8,
-    backgroundColor: colors.surfaceSoft,
-    color: colors.text,
-    fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
-    boxSizing: 'border-box',
-    outline: 'none',
+    ...inputBase,
   },
   eyeButton: {
     position: 'absolute',
@@ -398,25 +412,18 @@ const styles = {
   },
   forgotLink: {
     fontSize: 14,
-    color: colors.teal,
+    color: colorsLocal.teal,
     textDecoration: 'none',
     background: 'none',
     border: 'none',
     cursor: 'pointer',
     padding: 0,
-    fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
+    fontFamily: typography.fontFamily,
   },
   submitButton: {
-    marginTop: 8,
+    ...btnPrimary,
+    marginTop: spacing.sm,
     width: '100%',
-    padding: '14px 24px',
-    fontSize: 16,
-    fontWeight: 600,
-    color: '#fff',
-    backgroundColor: colors.teal,
-    border: 'none',
-    borderRadius: 8,
-    fontFamily: "'Manrope', -apple-system, system-ui, sans-serif",
   },
 };
 
