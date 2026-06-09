@@ -29,16 +29,36 @@ namespace CareCard.API.Controllers
         }
 
         [HttpGet("mine")]
-        public async Task<ActionResult<IEnumerable<EndringsForslag>>> HentMine([FromQuery] int limit = 20)
+        public async Task<ActionResult<IEnumerable<EndringsForslag>>> HentMine(
+            [FromQuery] int limit = 20,
+            [FromQuery] string filter = "aktive")
         {
             var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(idClaim) || !int.TryParse(idClaim, out var ansattId))
                 return Unauthorized();
 
             var cappedLimit = Math.Clamp(limit, 1, 50);
+            var godkjentGrense = DateTime.Now.AddDays(-7);
 
-            var forslag = await _context.EndringsForslag
-                .Where(e => e.OpprettetAvId == ansattId)
+            var query = _context.EndringsForslag
+                .Where(e => e.OpprettetAvId == ansattId);
+
+            query = filter.ToLowerInvariant() switch
+            {
+                "godkjent" => query.Where(e =>
+                    e.Status == "Godkjent"
+                    && e.BehandletTidspunkt != null
+                    && e.BehandletTidspunkt >= godkjentGrense),
+                "alle" => query,
+                _ => query.Where(e =>
+                    e.Status == "Venter"
+                    || e.Status == "Avvist"
+                    || (e.Status == "Godkjent"
+                        && e.BehandletTidspunkt != null
+                        && e.BehandletTidspunkt >= godkjentGrense)),
+            };
+
+            var forslag = await query
                 .OrderByDescending(e => e.OpprettetTidspunkt)
                 .Take(cappedLimit)
                 .Include(e => e.Pasient)

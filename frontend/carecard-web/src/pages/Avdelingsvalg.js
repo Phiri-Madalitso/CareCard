@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IconCalendar, IconChevronRight, IconHeart, IconShield } from '@tabler/icons-react';
+import {
+  IconCalendar,
+  IconChevronRight,
+  IconClipboardList,
+  IconHeart,
+  IconShield,
+} from '@tabler/icons-react';
 import Navbar from '../components/Navbar';
 import { useSpråk, getHilsenKey, formatDato } from '../hooks/useSprak';
 import { hentInnloggetProfil } from '../services/authService';
 import { hentMineForslag } from '../services/profilService';
-import ForslagStatusListe from '../components/ForslagStatusListe';
 import { mapForslagForVisning } from '../utils/forslagUtils';
 
 const AVDELINGS_IKONER = {
@@ -30,6 +35,17 @@ function Avdelingsvalg() {
   const [mineForslagLaster, setMineForslagLaster] = useState(erAnsatt);
   const [mineForslagFeil, setMineForslagFeil] = useState('');
   const fornavn = brukerNavn.split(' ')[0];
+
+  const venterAntall = mineForslag.filter((f) => f.status === 'Venter').length;
+
+  let forslagUndertekst = t.seForslagStatus;
+  if (mineForslagLaster) {
+    forslagUndertekst = t.laster;
+  } else if (!mineForslagFeil && mineForslag.length === 0) {
+    forslagUndertekst = t.ingenMineForslag;
+  } else if (!mineForslagFeil && venterAntall > 0) {
+    forslagUndertekst = `🟡 ${venterAntall} ${t.statusVenter.toLowerCase()}`;
+  }
 
   useEffect(() => {
     let avbrutt = false;
@@ -64,7 +80,7 @@ function Avdelingsvalg() {
       setMineForslagFeil('');
 
       try {
-        const data = await hentMineForslag(5);
+        const data = await hentMineForslag(20, 'aktive');
         if (!avbrutt) {
           setMineForslag(data.map((f) => mapForslagForVisning(f, t)));
         }
@@ -97,34 +113,25 @@ function Avdelingsvalg() {
         <p className="app-home-date">{formatDato(locale)}</p>
 
         {erAnsatt && (
-          <section className="app-home-forslag" aria-labelledby="mine-forslag-heading">
-            <div className="app-home-forslag-header">
-              <h2 id="mine-forslag-heading" className="app-home-forslag-title">
-                {t.dineSisteForslag}
-              </h2>
-              {mineForslag.length > 0 && (
-                <button
-                  type="button"
-                  className="app-home-forslag-link"
-                  onClick={() => navigate('/mine-forslag')}
-                >
-                  {t.seAlleForslag}
-                </button>
-              )}
-            </div>
-            {mineForslagLaster && (
-              <p className="forslag-status-laster">{t.laster}</p>
-            )}
+          <div className="app-home-forslag-wrap">
+            <button
+              type="button"
+              className="app-home-forslag-entry cc-card-hover"
+              onClick={() => navigate('/mine-forslag')}
+            >
+              <div className="app-home-dept-icon">
+                <IconClipboardList size={22} stroke={1.75} />
+              </div>
+              <div className="app-home-dept-text">
+                <span className="app-home-dept-title">{t.dineSisteForslag}</span>
+                <span className="app-home-dept-subtitle">{forslagUndertekst}</span>
+              </div>
+              <IconChevronRight size={22} color="#94A3B8" />
+            </button>
             {mineForslagFeil && (
-              <p className="forslag-status-feil">{mineForslagFeil}</p>
+              <p className="app-home-forslag-feil">{mineForslagFeil}</p>
             )}
-            <ForslagStatusListe
-              forslag={mineForslag}
-              kompakt
-              feil={mineForslagFeil}
-              laster={mineForslagLaster}
-            />
-          </section>
+          </div>
         )}
 
         <h2 className="app-home-question">{t.hvilkenAvdeling}</h2>

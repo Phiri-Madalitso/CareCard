@@ -7,6 +7,7 @@ function ForslagStatusListe({
   onKlikkPasient,
   feil = '',
   laster = false,
+  tomTekst,
 }) {
   const { t } = useSpråk();
 
@@ -16,7 +17,7 @@ function ForslagStatusListe({
 
   if (!forslag.length) {
     return (
-      <p className="forslag-status-tom">{t.ingenMineForslag}</p>
+      <p className="forslag-status-tom">{tomTekst || t.ingenMineForslag}</p>
     );
   }
 

@@ -539,38 +539,41 @@ button:focus-visible {
   color: var(--cc-text-muted);
 }
 
-.app-home-forslag {
-  margin: 28px 0 32px;
-  padding: 20px;
-  background: var(--cc-surface);
-  border: 1px solid var(--cc-border-light);
-  border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.06);
+.app-home-forslag-wrap {
+  margin: 20px 0 24px;
 }
 
-.app-home-forslag-header {
+.app-home-forslag-entry {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
-  margin-bottom: 16px;
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--cc-surface);
+  border: 1px solid var(--cc-border-light);
+  border-radius: 12px;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.app-home-forslag-title {
-  margin: 0;
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--cc-text);
+.app-home-forslag-feil {
+  margin: 8px 0 0;
+  padding: 0 4px;
+  font-size: 13px;
+  color: #A32D2D;
+  line-height: 1.45;
 }
 
-.app-home-forslag-link {
-  border: none;
-  background: none;
-  color: var(--cc-secondary);
-  font-size: 14px;
-  font-weight: 600;
-  padding: 4px 0;
-  white-space: nowrap;
+.forslag-filter-row {
+  margin-bottom: 20px;
+}
+
+.forslag-filter-btn--aktiv {
+  background: var(--cc-accent);
+  color: #fff;
+  border-color: var(--cc-accent);
 }
 
 .forslag-status-intro {
