@@ -144,22 +144,6 @@ namespace CareCard.API.Controllers
                 return true;
             }
 
-            if (forslag.ProfilType.Equals("Stellprofil", StringComparison.OrdinalIgnoreCase))
-            {
-                var stellprofil = await _context.Stellprofiler
-                    .FirstOrDefaultAsync(s => s.PasientId == forslag.PasientId);
-
-                if (stellprofil == null)
-                    return false;
-
-                if (!SetPropertyValue(stellprofil, forslag.FeltNavn, verdiTilProfil))
-                    return false;
-
-                stellprofil.SistEndret = DateTime.Now;
-                stellprofil.SistEndretAvId = forslag.BehandletAvId ?? forslag.OpprettetAvId;
-                return true;
-            }
-
             return false;
         }
 

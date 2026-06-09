@@ -1,12 +1,12 @@
 # CareCard
 
-Digitalt mat- og stellkort for sykehjem. CareCard erstatter fysiske matkort med en flerspråklig webapp der ansatte kan lese og foreslå endringer i pasienters mat- og stellprofiler, mens sykepleiere og ledere godkjenner endringer før de lagres.
+Digitalt matkort for sykehjem. CareCard erstatter fysiske matkort med en flerspråklig webapp der ansatte kan lese og foreslå endringer i pasienters matprofiler, mens sykepleiere og ledere godkjenner endringer før de lagres.
 
 ---
 
 ## Funksjoner
 
-- **Pasientkort** — matprofil og stellprofil med allergier, konsistens, preferanser og rutiner
+- **Pasientkort** — matprofil med allergier, konsistens, preferanser og måltidsrutiner
 - **Endringsforslag** — ansatte foreslår endringer uten å skrive direkte i profilen
 - **Godkjenning** — sykepleier/leder godkjenner eller avviser forslag med begrunnelse
 - **Flerspråklig UI** — norsk, engelsk, spansk, polsk og portugisisk
@@ -133,7 +133,7 @@ Seed-data opprettes automatisk ved oppstart hvis databasen er tom.
 | Sykepleier | `sykepleier@carecard.no` | `CareCard123` |
 | Leder | `leder@carecard.no` | `CareCard123` |
 
-Velg **Langtidsavdeling** for testpasienter med mat- og stellprofiler.
+Velg **Langtidsavdeling** for testpasienter med matprofiler.
 
 ---
 
@@ -144,7 +144,6 @@ Velg **Langtidsavdeling** for testpasienter med mat- og stellprofiler.
 | POST | `/api/auth/login` | Innlogging, returnerer JWT |
 | GET | `/api/pasient/avdeling/{id}` | Pasienter per avdeling |
 | GET | `/api/matprofil/pasient/{id}` | Matprofil |
-| GET | `/api/stellprofil/pasient/{id}` | Stellprofil |
 | POST | `/api/endringsforslag` | Opprett endringsforslag (med auto-oversettelse) |
 | GET | `/api/endringsforslag/venter` | Ventende forslag |
 | PUT | `/api/endringsforslag/{id}/godkjenn` | Godkjenn forslag |

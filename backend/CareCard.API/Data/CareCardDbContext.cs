@@ -13,7 +13,6 @@ namespace CareCard.API.Data
         // Tabeller i databasen
         public DbSet<Pasient> Pasienter { get; set; }
         public DbSet<Matprofil> Matprofiler { get; set; }
-        public DbSet<Stellprofil> Stellprofiler { get; set; }
         public DbSet<EndringsForslag> EndringsForslag { get; set; }
         public DbSet<Ansatt> Ansatte { get; set; }
 
@@ -24,12 +23,6 @@ namespace CareCard.API.Data
                 .HasOne(m => m.Pasient)
                 .WithOne()
                 .HasForeignKey<Matprofil>(m => m.PasientId);
-
-            // Pasient → Stellprofil (én til én)
-            modelBuilder.Entity<Stellprofil>()
-                .HasOne(s => s.Pasient)
-                .WithOne()
-                .HasForeignKey<Stellprofil>(s => s.PasientId);
 
             // Pasient → EndringsForslag (én til mange)
             modelBuilder.Entity<EndringsForslag>()
