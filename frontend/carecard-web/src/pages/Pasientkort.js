@@ -14,7 +14,6 @@ import Navbar from '../components/Navbar';
 import { useSpråk } from '../hooks/useSprak';
 import {
   hentMatprofil,
-  hentStellprofil,
   sendEndringsforslag,
   oversettTekster,
 } from '../services/profilService';
@@ -29,28 +28,20 @@ import {
 } from '../styles/theme';
 
 const FELT_KONFIG = {
-  fortykningsbehov: { profilType: 'Matprofil', apiFelt: 'KonsistensDrikke', kilde: 'mat', felt: 'konsistensDrikke' },
-  kaffeTe: { profilType: 'Matprofil', apiFelt: 'KaffeTe', kilde: 'mat', felt: 'kaffeTe' },
-  drikke: { profilType: 'Matprofil', apiFelt: 'Drikke', kilde: 'mat', felt: 'drikke' },
-  frokost: { profilType: 'Matprofil', apiFelt: 'Frokost', kilde: 'mat', felt: 'frokost' },
-  kveldsmat: { profilType: 'Matprofil', apiFelt: 'Kvelds', kilde: 'mat', felt: 'kvelds' },
-  konsistensMat: { profilType: 'Matprofil', apiFelt: 'KonsistensMat', kilde: 'mat', felt: 'konsistensMat' },
-  hvorSpiser: { profilType: 'Matprofil', apiFelt: 'HvorSpiser', kilde: 'mat', felt: 'hvorSpiser' },
-  redskap: { profilType: 'Matprofil', apiFelt: 'Redskap', kilde: 'mat', felt: 'redskap' },
-  likerIkke: { profilType: 'Matprofil', apiFelt: 'Misliker', kilde: 'mat', felt: 'misliker' },
-  stellpreferanser: { profilType: 'Stellprofil', apiFelt: 'StellPreferanser', kilde: 'stell', felt: 'stellPreferanser' },
-  kommunikasjonsbehov: { profilType: 'Stellprofil', apiFelt: 'Kommunikasjon', kilde: 'stell', felt: 'kommunikasjon' },
-  viktigeHensyn: { profilType: 'Stellprofil', apiFelt: 'ViktigeHensyn', kilde: 'stell', felt: 'viktigeHensyn' },
-  rutiner: { profilType: 'Stellprofil', apiFelt: 'Rutiner', kilde: 'stell', felt: 'rutiner' },
+  fortykningsbehov: { profilType: 'Matprofil', apiFelt: 'KonsistensDrikke', felt: 'konsistensDrikke' },
+  kaffeTe: { profilType: 'Matprofil', apiFelt: 'KaffeTe', felt: 'kaffeTe' },
+  drikke: { profilType: 'Matprofil', apiFelt: 'Drikke', felt: 'drikke' },
+  frokost: { profilType: 'Matprofil', apiFelt: 'Frokost', felt: 'frokost' },
+  kveldsmat: { profilType: 'Matprofil', apiFelt: 'Kvelds', felt: 'kvelds' },
+  konsistensMat: { profilType: 'Matprofil', apiFelt: 'KonsistensMat', felt: 'konsistensMat' },
+  hvorSpiser: { profilType: 'Matprofil', apiFelt: 'HvorSpiser', felt: 'hvorSpiser' },
+  redskap: { profilType: 'Matprofil', apiFelt: 'Redskap', felt: 'redskap' },
+  likerIkke: { profilType: 'Matprofil', apiFelt: 'Misliker', felt: 'misliker' },
 };
 
 const MAT_OVERSATT_FELTER = [
   'allergier', 'konsistensDrikke', 'kaffeTe', 'drikke', 'frokost',
   'kvelds', 'konsistensMat', 'hvorSpiser', 'redskap', 'misliker',
-];
-
-const STELL_OVERSATT_FELTER = [
-  'stellPreferanser', 'kommunikasjon', 'viktigeHensyn', 'rutiner',
 ];
 
 async function oversettProfil(profil, felter, malSprak) {
@@ -160,11 +151,8 @@ function Pasientkort() {
   const { språk, t } = useSpråk();
   const pasient = location.state?.pasient;
 
-  const [activeTab, setActiveTab] = useState('matprofil');
   const [matprofil, setMatprofil] = useState(null);
-  const [stellprofil, setStellprofil] = useState(null);
   const [matprofilVisning, setMatprofilVisning] = useState(null);
-  const [stellprofilVisning, setStellprofilVisning] = useState(null);
   const [laster, setLaster] = useState(true);
   const [oversetterInnhold, setOversetterInnhold] = useState(false);
   const [feil, setFeil] = useState('');
@@ -173,24 +161,18 @@ function Pasientkort() {
   const [sender, setSender] = useState(false);
   const [visToast, setVisToast] = useState(false);
 
-  const oppdaterVisning = useCallback(async (mat, stell, malSprak) => {
+  const oppdaterVisning = useCallback(async (mat, malSprak) => {
     if (malSprak === 'no') {
       setMatprofilVisning(mat);
-      setStellprofilVisning(stell);
       return;
     }
 
     setOversetterInnhold(true);
     try {
-      const [matV, stellV] = await Promise.all([
-        oversettProfil(mat, MAT_OVERSATT_FELTER, malSprak),
-        oversettProfil(stell, STELL_OVERSATT_FELTER, malSprak),
-      ]);
+      const matV = await oversettProfil(mat, MAT_OVERSATT_FELTER, malSprak);
       setMatprofilVisning(matV);
-      setStellprofilVisning(stellV);
     } catch {
       setMatprofilVisning(mat);
-      setStellprofilVisning(stell);
       setFeil(t.kunneIkkeOversette);
     } finally {
       setOversetterInnhold(false);
@@ -211,15 +193,11 @@ function Pasientkort() {
       setFeil('');
 
       try {
-        const [mat, stell] = await Promise.all([
-          hentMatprofil(pasient.id),
-          hentStellprofil(pasient.id),
-        ]);
+        const mat = await hentMatprofil(pasient.id);
         if (!avbrutt) {
           setMatprofil(mat);
-          setStellprofil(stell);
-          if (!mat && !stell) {
-            setFeil(t.ingenProfilData);
+          if (!mat) {
+            setFeil(t.manglerMatprofil);
           }
         }
       } catch {
@@ -238,46 +216,41 @@ function Pasientkort() {
     return () => {
       avbrutt = true;
     };
-  }, [pasient?.id, t.kunneIkkeHenteProfil, t.ingenProfilData]);
+  }, [pasient?.id, t.kunneIkkeHenteProfil, t.manglerMatprofil]);
 
   useEffect(() => {
-    if (!matprofil && !stellprofil) return undefined;
+    if (!matprofil) return undefined;
     let avbrutt = false;
 
     async function oppdaterVedSprakbytte() {
-      await oppdaterVisning(matprofil, stellprofil, språk);
+      await oppdaterVisning(matprofil, språk);
       if (avbrutt) return;
     }
 
     oppdaterVedSprakbytte();
     return () => { avbrutt = true; };
-  }, [språk, matprofil, stellprofil, oppdaterVisning]);
+  }, [språk, matprofil, oppdaterVisning]);
 
   const hentOriginalVerdi = useCallback(
     (feltNavn) => {
       const cfg = FELT_KONFIG[feltNavn];
       if (!cfg) return '';
-      const profil = cfg.kilde === 'mat' ? matprofil : stellprofil;
-      return profil?.[cfg.felt] ?? '';
+      return matprofil?.[cfg.felt] ?? '';
     },
-    [matprofil, stellprofil]
+    [matprofil]
   );
 
   const hentVisningsVerdi = useCallback(
     (feltNavn) => {
       const cfg = FELT_KONFIG[feltNavn];
       if (!cfg) return '';
-      const profil = cfg.kilde === 'mat'
-        ? (matprofilVisning ?? matprofil)
-        : (stellprofilVisning ?? stellprofil);
+      const profil = matprofilVisning ?? matprofil;
       return profil?.[cfg.felt] ?? '';
     },
-    [matprofil, stellprofil, matprofilVisning, stellprofilVisning]
+    [matprofil, matprofilVisning]
   );
 
-  const sistEndretTekst = formatSistEndret(
-    activeTab === 'matprofil' ? matprofil?.sistEndret : stellprofil?.sistEndret
-  );
+  const sistEndretTekst = formatSistEndret(matprofil?.sistEndret);
 
   const allergierListe = ((matprofilVisning ?? matprofil)?.allergier || '')
     .split(',')
@@ -381,26 +354,7 @@ function Pasientkort() {
           <p style={styles.lasterTekst}>{t.oversetterInnhold}</p>
         )}
 
-        {!laster && (
-          <>
-            <div className="app-tab-bar">
-              <button
-                type="button"
-                className={`app-tab-btn${activeTab === 'matprofil' ? ' app-tab-btn--active' : ''}`}
-                onClick={() => setActiveTab('matprofil')}
-              >
-                {t.matprofil}
-              </button>
-              <button
-                type="button"
-                className={`app-tab-btn${activeTab === 'stellprofil' ? ' app-tab-btn--active' : ''}`}
-                onClick={() => setActiveTab('stellprofil')}
-              >
-                {t.stellprofil}
-              </button>
-            </div>
-
-            {activeTab === 'matprofil' && matprofil && (
+        {!laster && matprofil && (
               <div style={styles.tabContent}>
                 {allergierListe.length > 0 && (
                   <SectionBox title={t.allergier} variant="red">
@@ -554,82 +508,10 @@ function Pasientkort() {
                   <span>{t.sistEndret}: {sistEndretTekst}</span>
                 </div>
               </div>
-            )}
+        )}
 
-            {activeTab === 'matprofil' && !matprofil && !laster && (
-              <p style={styles.feilTekst}>{t.manglerMatprofil}</p>
-            )}
-
-            {activeTab === 'stellprofil' && stellprofil && (
-              <div style={styles.tabContent}>
-                <RedigerbartFelt
-                  feltNavn="stellpreferanser"
-                  label={t.stellpreferanser}
-                  ikon={null}
-                  verdi={hentVisningsVerdi('stellpreferanser')}
-                  erAktiv={aktivtFelt === 'stellpreferanser'}
-                  nyVerdi={nyVerdi}
-                  sender={sender}
-                  t={t}
-                  onStartRediger={(felt, verdi) => { setAktivtFelt(felt); setNyVerdi(verdi); }}
-                  onAvbryt={() => setAktivtFelt(null)}
-                  onNyVerdiChange={setNyVerdi}
-                  onSend={sendForslag}
-                />
-                <RedigerbartFelt
-                  feltNavn="kommunikasjonsbehov"
-                  label={t.kommunikasjonsbehov}
-                  ikon={null}
-                  verdi={hentVisningsVerdi('kommunikasjonsbehov')}
-                  erAktiv={aktivtFelt === 'kommunikasjonsbehov'}
-                  nyVerdi={nyVerdi}
-                  sender={sender}
-                  t={t}
-                  onStartRediger={(felt, verdi) => { setAktivtFelt(felt); setNyVerdi(verdi); }}
-                  onAvbryt={() => setAktivtFelt(null)}
-                  onNyVerdiChange={setNyVerdi}
-                  onSend={sendForslag}
-                />
-                <RedigerbartFelt
-                  feltNavn="viktigeHensyn"
-                  label={t.viktigeHensyn}
-                  ikon={null}
-                  verdi={hentVisningsVerdi('viktigeHensyn')}
-                  erAktiv={aktivtFelt === 'viktigeHensyn'}
-                  nyVerdi={nyVerdi}
-                  sender={sender}
-                  t={t}
-                  onStartRediger={(felt, verdi) => { setAktivtFelt(felt); setNyVerdi(verdi); }}
-                  onAvbryt={() => setAktivtFelt(null)}
-                  onNyVerdiChange={setNyVerdi}
-                  onSend={sendForslag}
-                />
-                <RedigerbartFelt
-                  feltNavn="rutiner"
-                  label={t.rutiner}
-                  ikon={null}
-                  verdi={hentVisningsVerdi('rutiner')}
-                  erAktiv={aktivtFelt === 'rutiner'}
-                  nyVerdi={nyVerdi}
-                  sender={sender}
-                  t={t}
-                  onStartRediger={(felt, verdi) => { setAktivtFelt(felt); setNyVerdi(verdi); }}
-                  onAvbryt={() => setAktivtFelt(null)}
-                  onNyVerdiChange={setNyVerdi}
-                  onSend={sendForslag}
-                />
-
-                <div style={styles.lastChanged}>
-                  <IconClock size={14} color="#6B7280" />
-                  <span>{t.sistEndret}: {sistEndretTekst}</span>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'stellprofil' && !stellprofil && !laster && (
-              <p style={styles.feilTekst}>{t.manglerStellprofil}</p>
-            )}
-          </>
+        {!laster && !matprofil && !feil && (
+          <p style={styles.feilTekst}>{t.manglerMatprofil}</p>
         )}
 
         {visToast && (

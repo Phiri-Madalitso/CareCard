@@ -7,13 +7,6 @@ export async function hentMatprofil(pasientId) {
   return response.json();
 }
 
-export async function hentStellprofil(pasientId) {
-  const response = await apiFetch(`/api/stellprofil/pasient/${pasientId}`);
-  if (response.status === 404) return null;
-  if (!response.ok) throw new Error('Kunne ikke hente stellprofil.');
-  return response.json();
-}
-
 export async function sendEndringsforslag(forslag) {
   const response = await apiFetch('/api/endringsforslag', {
     method: 'POST',
