@@ -80,6 +80,19 @@ export const tekster = {
     kunneIkkeHenteForslag: 'Kunne ikke hente ventende forslag.',
     kunneIkkeGodkjenne: 'Kunne ikke godkjenne forslaget.',
     kunneIkkeAvvise: 'Kunne ikke avvise forslaget.',
+
+    // Mine forslag
+    mineForslag: 'Mine forslag',
+    mineForslagIntro: 'Status på endringer du har sendt inn. Ingen varsler — sjekk her når du åpner appen.',
+    dineSisteForslag: 'Dine siste forslag',
+    seAlleForslag: 'Se alle',
+    ingenMineForslag: 'Du har ikke sendt inn noen forslag ennå.',
+    statusVenter: 'Venter',
+    statusGodkjent: 'Godkjent',
+    statusAvvist: 'Avvist',
+    begrunnelse: 'Begrunnelse',
+    godkjentDato: 'Godkjent',
+    kunneIkkeHenteMineForslag: 'Kunne ikke hente dine forslag.',
   },
 
   en: {
@@ -163,6 +176,18 @@ export const tekster = {
     kunneIkkeHenteForslag: 'Could not load pending suggestions.',
     kunneIkkeGodkjenne: 'Could not approve the suggestion.',
     kunneIkkeAvvise: 'Could not reject the suggestion.',
+
+    mineForslag: 'My suggestions',
+    mineForslagIntro: 'Status of changes you submitted. No notifications — check here when you open the app.',
+    dineSisteForslag: 'Your recent suggestions',
+    seAlleForslag: 'See all',
+    ingenMineForslag: 'You have not submitted any suggestions yet.',
+    statusVenter: 'Pending',
+    statusGodkjent: 'Approved',
+    statusAvvist: 'Rejected',
+    begrunnelse: 'Reason',
+    godkjentDato: 'Approved',
+    kunneIkkeHenteMineForslag: 'Could not load your suggestions.',
   },
 
   es: {
@@ -246,6 +271,18 @@ export const tekster = {
     kunneIkkeHenteForslag: 'No se pudieron cargar las sugerencias pendientes.',
     kunneIkkeGodkjenne: 'No se pudo aprobar la sugerencia.',
     kunneIkkeAvvise: 'No se pudo rechazar la sugerencia.',
+
+    mineForslag: 'Mis sugerencias',
+    mineForslagIntro: 'Estado de los cambios que enviaste. Sin alertas — revisa aquí al abrir la app.',
+    dineSisteForslag: 'Tus últimas sugerencias',
+    seAlleForslag: 'Ver todas',
+    ingenMineForslag: 'Aún no has enviado ninguna sugerencia.',
+    statusVenter: 'Pendiente',
+    statusGodkjent: 'Aprobada',
+    statusAvvist: 'Rechazada',
+    begrunnelse: 'Motivo',
+    godkjentDato: 'Aprobada',
+    kunneIkkeHenteMineForslag: 'No se pudieron cargar tus sugerencias.',
   },
 
   pl: {
@@ -329,6 +366,18 @@ export const tekster = {
     kunneIkkeHenteForslag: 'Nie można załadować oczekujących propozycji.',
     kunneIkkeGodkjenne: 'Nie można zatwierdzić propozycji.',
     kunneIkkeAvvise: 'Nie można odrzucić propozycji.',
+
+    mineForslag: 'Moje propozycje',
+    mineForslagIntro: 'Status zmian, które wysłałeś. Bez powiadomień — sprawdź tutaj po otwarciu aplikacji.',
+    dineSisteForslag: 'Twoje ostatnie propozycje',
+    seAlleForslag: 'Zobacz wszystkie',
+    ingenMineForslag: 'Nie wysłałeś jeszcze żadnych propozycji.',
+    statusVenter: 'Oczekuje',
+    statusGodkjent: 'Zatwierdzona',
+    statusAvvist: 'Odrzucona',
+    begrunnelse: 'Powód',
+    godkjentDato: 'Zatwierdzona',
+    kunneIkkeHenteMineForslag: 'Nie można załadować twoich propozycji.',
   },
 
   pt: {
@@ -412,5 +461,17 @@ export const tekster = {
     kunneIkkeHenteForslag: 'Não foi possível carregar sugestões pendentes.',
     kunneIkkeGodkjenne: 'Não foi possível aprovar a sugestão.',
     kunneIkkeAvvise: 'Não foi possível rejeitar a sugestão.',
+
+    mineForslag: 'Minhas sugestões',
+    mineForslagIntro: 'Status das alterações que você enviou. Sem alertas — confira aqui ao abrir o app.',
+    dineSisteForslag: 'Suas últimas sugestões',
+    seAlleForslag: 'Ver todas',
+    ingenMineForslag: 'Você ainda não enviou nenhuma sugestão.',
+    statusVenter: 'Aguardando',
+    statusGodkjent: 'Aprovada',
+    statusAvvist: 'Recusada',
+    begrunnelse: 'Motivo',
+    godkjentDato: 'Aprovada',
+    kunneIkkeHenteMineForslag: 'Não foi possível carregar suas sugestões.',
   },
 };

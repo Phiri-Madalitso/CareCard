@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Security.Claims;
 using CareCard.API.Data;
 using CareCard.API.Models;
 using CareCard.API.Services;
@@ -25,6 +26,25 @@ namespace CareCard.API.Controllers
             _context = context;
             _translator = translator;
             _logger = logger;
+        }
+
+        [HttpGet("mine")]
+        public async Task<ActionResult<IEnumerable<EndringsForslag>>> HentMine([FromQuery] int limit = 20)
+        {
+            var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(idClaim) || !int.TryParse(idClaim, out var ansattId))
+                return Unauthorized();
+
+            var cappedLimit = Math.Clamp(limit, 1, 50);
+
+            var forslag = await _context.EndringsForslag
+                .Where(e => e.OpprettetAvId == ansattId)
+                .OrderByDescending(e => e.OpprettetTidspunkt)
+                .Take(cappedLimit)
+                .Include(e => e.Pasient)
+                .ToListAsync();
+
+            return forslag;
         }
 
         [HttpGet("venter")]

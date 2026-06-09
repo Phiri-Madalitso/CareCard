@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IconBell, IconLogout } from '@tabler/icons-react';
+import { IconBell, IconClipboardList, IconLogout } from '@tabler/icons-react';
 import CareCardLogo from './CareCardLogo';
 import { useSpråk, getInitialer } from '../hooks/useSprak';
 import { loggUt } from '../services/authService';
@@ -12,6 +12,7 @@ function Navbar() {
   const brukerNavn = localStorage.getItem('navn') || 'Bruker';
   const rolle = localStorage.getItem('rolle');
   const skalViseVarsler = rolle === 'sykepleier' || rolle === 'leder';
+  const skalViseMineForslag = rolle === 'ansatt';
   const [antallVentende, setAntallVentende] = useState(0);
 
   useEffect(() => {
@@ -59,6 +60,16 @@ function Navbar() {
         </button>
 
         <div className="app-header-actions">
+          {skalViseMineForslag && (
+            <button
+              type="button"
+              className="app-header-notify"
+              onClick={() => navigate('/mine-forslag')}
+              aria-label={t.mineForslag}
+            >
+              <IconClipboardList size={22} stroke={1.75} color="#FFFFFF" />
+            </button>
+          )}
           {skalViseVarsler && (
             <button
               type="button"

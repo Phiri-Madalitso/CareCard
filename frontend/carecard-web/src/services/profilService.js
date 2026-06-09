@@ -25,6 +25,12 @@ export async function hentVentendeForslag() {
   return response.json();
 }
 
+export async function hentMineForslag(limit = 20) {
+  const response = await apiFetch(`/api/endringsforslag/mine?limit=${limit}`);
+  if (!response.ok) throw new Error('Kunne ikke hente dine forslag.');
+  return response.json();
+}
+
 export async function godkjennForslag(id, behandletAvId = getAnsattId()) {
   const response = await apiFetch(
     `/api/endringsforslag/${id}/godkjenn?behandletAvId=${behandletAvId}`,

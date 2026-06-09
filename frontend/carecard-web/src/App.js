@@ -5,6 +5,7 @@ import Avdelingsvalg from './pages/Avdelingsvalg';
 import Pasientliste from './pages/Pasientliste';
 import Pasientkort from './pages/Pasientkort';
 import Godkjenning from './pages/Godkjenning';
+import MineForslag from './pages/MineForslag';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -23,6 +24,9 @@ function App() {
         } />
         <Route path="/godkjenning" element={
           <ProtectedRoute><Godkjenning /></ProtectedRoute>
+        } />
+        <Route path="/mine-forslag" element={
+          <ProtectedRoute><MineForslag /></ProtectedRoute>
         } />
       </Routes>
     </BrowserRouter>

@@ -539,6 +539,194 @@ button:focus-visible {
   color: var(--cc-text-muted);
 }
 
+.app-home-forslag {
+  margin: 28px 0 32px;
+  padding: 20px;
+  background: var(--cc-surface);
+  border: 1px solid var(--cc-border-light);
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.06);
+}
+
+.app-home-forslag-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.app-home-forslag-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--cc-text);
+}
+
+.app-home-forslag-link {
+  border: none;
+  background: none;
+  color: var(--cc-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 0;
+  white-space: nowrap;
+}
+
+.forslag-status-intro {
+  margin: 0 0 20px;
+  font-size: 15px;
+  color: var(--cc-text-muted);
+  line-height: 1.55;
+}
+
+.forslag-status-feil {
+  color: #A32D2D;
+  font-size: 15px;
+  margin-bottom: 16px;
+}
+
+.forslag-status-laster,
+.forslag-status-tom {
+  color: var(--cc-text-muted);
+  font-size: 15px;
+  margin: 0;
+  line-height: 1.55;
+}
+
+.forslag-status-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.forslag-status-kort {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: #F9FAFB;
+  border: 1px solid var(--cc-border-light);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+button.forslag-status-kort {
+  font: inherit;
+  color: inherit;
+}
+
+.forslag-status-kort--klikkbar {
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.forslag-status-kort--klikkbar:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+.forslag-status-liste--kompakt .forslag-status-kort {
+  padding: 12px 14px;
+}
+
+.forslag-status-rad-topp {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.forslag-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.forslag-status--venter {
+  background: #FAEEDA;
+  color: #854F0B;
+}
+
+.forslag-status--godkjent {
+  background: #E6F4EA;
+  color: #0F6E56;
+}
+
+.forslag-status--avvist {
+  background: #FCEBEB;
+  color: #A32D2D;
+}
+
+.forslag-status-dato {
+  font-size: 12px;
+  color: var(--cc-text-muted);
+  white-space: nowrap;
+}
+
+.forslag-status-pasient {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--cc-text);
+}
+
+.forslag-status-felt {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: var(--cc-text-muted);
+}
+
+.forslag-status-endring {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.forslag-status-gammel {
+  color: #A32D2D;
+}
+
+.forslag-status-ny {
+  color: #0F6E56;
+  font-weight: 600;
+}
+
+.forslag-status-pil {
+  color: var(--cc-text-subtle);
+}
+
+.forslag-status-begrunnelse {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #FCEBEB;
+  color: #7A2424;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.forslag-status-begrunnelse-label {
+  font-weight: 700;
+}
+
+.forslag-status-meta {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--cc-text-muted);
+}
+
 /* ── Pasientkort to-kolonne felt ── */
 .app-field-grid {
   display: grid;

@@ -4,6 +4,9 @@ import { IconCalendar, IconChevronRight, IconHeart, IconShield } from '@tabler/i
 import Navbar from '../components/Navbar';
 import { useSpråk, getHilsenKey, formatDato } from '../hooks/useSprak';
 import { hentInnloggetProfil } from '../services/authService';
+import { hentMineForslag } from '../services/profilService';
+import ForslagStatusListe from '../components/ForslagStatusListe';
+import { mapForslagForVisning } from '../utils/forslagUtils';
 
 const AVDELINGS_IKONER = {
   1: IconHeart,
@@ -21,6 +24,11 @@ function Avdelingsvalg() {
   const navigate = useNavigate();
   const { t, locale } = useSpråk();
   const [brukerNavn, setBrukerNavn] = useState(() => localStorage.getItem('navn') || 'Bruker');
+  const rolle = localStorage.getItem('rolle');
+  const erAnsatt = rolle === 'ansatt';
+  const [mineForslag, setMineForslag] = useState([]);
+  const [mineForslagLaster, setMineForslagLaster] = useState(erAnsatt);
+  const [mineForslagFeil, setMineForslagFeil] = useState('');
   const fornavn = brukerNavn.split(' ')[0];
 
   useEffect(() => {
@@ -46,6 +54,39 @@ function Avdelingsvalg() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!erAnsatt) return undefined;
+
+    let avbrutt = false;
+
+    async function lastMineForslag() {
+      setMineForslagLaster(true);
+      setMineForslagFeil('');
+
+      try {
+        const data = await hentMineForslag(5);
+        if (!avbrutt) {
+          setMineForslag(data.map((f) => mapForslagForVisning(f, t)));
+        }
+      } catch {
+        if (!avbrutt) {
+          setMineForslag([]);
+          setMineForslagFeil(t.kunneIkkeHenteMineForslag);
+        }
+      } finally {
+        if (!avbrutt) {
+          setMineForslagLaster(false);
+        }
+      }
+    }
+
+    lastMineForslag();
+
+    return () => {
+      avbrutt = true;
+    };
+  }, [erAnsatt, locale, t]);
+
   return (
     <div className="app-shell">
       <Navbar />
@@ -54,6 +95,37 @@ function Avdelingsvalg() {
         <p className="app-home-greeting">{t[getHilsenKey()]},</p>
         <h1 className="app-home-name">{fornavn} 👋</h1>
         <p className="app-home-date">{formatDato(locale)}</p>
+
+        {erAnsatt && (
+          <section className="app-home-forslag" aria-labelledby="mine-forslag-heading">
+            <div className="app-home-forslag-header">
+              <h2 id="mine-forslag-heading" className="app-home-forslag-title">
+                {t.dineSisteForslag}
+              </h2>
+              {mineForslag.length > 0 && (
+                <button
+                  type="button"
+                  className="app-home-forslag-link"
+                  onClick={() => navigate('/mine-forslag')}
+                >
+                  {t.seAlleForslag}
+                </button>
+              )}
+            </div>
+            {mineForslagLaster && (
+              <p className="forslag-status-laster">{t.laster}</p>
+            )}
+            {mineForslagFeil && (
+              <p className="forslag-status-feil">{mineForslagFeil}</p>
+            )}
+            <ForslagStatusListe
+              forslag={mineForslag}
+              kompakt
+              feil={mineForslagFeil}
+              laster={mineForslagLaster}
+            />
+          </section>
+        )}
 
         <h2 className="app-home-question">{t.hvilkenAvdeling}</h2>
 
